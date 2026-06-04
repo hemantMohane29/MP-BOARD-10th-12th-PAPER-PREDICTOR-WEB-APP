@@ -7,3 +7,5 @@ sarvamai
 reportlab
 PyPDF2
 Pillow
+gunicorn
+whitenoise
