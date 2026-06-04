@@ -125,8 +125,6 @@ class AIPipelineOrchestrator:
                 return result
             except Exception as e:
                 print(f"[Pipeline] Model {model_name} failed: {str(e)[:120]}")
-                with open(os.path.join(settings.BASE_DIR, "error_log.txt"), "a") as f:
-                    f.write(f"\n[Model Fallback Error] {model_name}: {e}\n")
                 last_error = e
                 time.sleep(2)
         raise last_error
@@ -710,10 +708,6 @@ class AIPipelineOrchestrator:
             return {"stage_2": stage_2_result, "stage_3": stage_3_result}
             
         except Exception as e:
-            # Log the error for debugging
-            with open(os.path.join(settings.BASE_DIR, "error_log.txt"), "a") as f:
-                import traceback
-                f.write(f"\n[Pipeline Crash] {time.ctime()}:\n")
-                f.write(traceback.format_exc())
-            print(f"Pipeline crashed: {e}")
+            import traceback
+            print(f"[Pipeline Crash] {time.ctime()}:\n{traceback.format_exc()}")
             raise e
