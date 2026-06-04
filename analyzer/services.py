@@ -11,11 +11,11 @@ import tempfile
 from sarvamai import SarvamAI
 from .models import ExamPaper
 
-load_dotenv(r"c:\Users\Asus\Downloads\HIndi medium\.env", override=True)
+load_dotenv(override=True)
 
 def get_fresh_sarvam_key():
     """Reloads .env and returns the current Sarvam API key."""
-    load_dotenv(r"c:\Users\Asus\Downloads\HIndi medium\.env", override=True)
+    load_dotenv(override=True)
     key = os.environ.get("SARVAM_API_KEY", "")
     if key:
         print(f"[Debug] Using Sarvam Key starting with: {key[:8]}...")
@@ -103,31 +103,9 @@ GENERATE_CONFIG = types.GenerateContentConfig(
 
 class AIPipelineOrchestrator:
     def __init__(self):
-        models_to_try = [
-            'gemini-3-flash-preview',
-            'gemini-3.1-flash-lite-preview',
-            'gemini-3-pro-preview',
-            'gemini-2.5-flash',         
-            'gemini-flash-lite-latest',
-        ]
-        self.model_name = None
-        for model_name in models_to_try:
-            try:
-                client.models.generate_content(
-                    model=model_name,
-                    contents="test",
-                    config=GENERATE_CONFIG
-                )
-                self.model_name = model_name
-                print(f"[Analyzer] Successfully selected model: {model_name}")
-                break
-            except Exception as e:
-                print(f"[Analyzer] Model {model_name} unavailable: {e}")
-                continue
-        
-        if self.model_name is None:
-            self.model_name = 'gemini-3-flash-preview'
-            print(f"[Analyzer] Final Fallback: using {self.model_name}")
+        # Default to best available model — actual fallback happens at call time
+        self.model_name = 'gemini-2.5-flash'
+        print(f"[Analyzer] Using model: {self.model_name}")
         
     FALLBACK_MODELS = [
         'gemini-3-flash-preview',
