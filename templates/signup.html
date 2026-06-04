@@ -1,0 +1,358 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up | MP Board Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/global_animations.css' %}">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg:            linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 50%, #faf5ff 100%);
+  --grid:          rgba(99,102,241,0.04);
+  --panel-bg:      rgba(255,255,255,0.80);
+  --panel-border:  rgba(99,102,241,0.12);
+  --text:          #1e1b4b;
+  --text-sub:      #475569;
+  --text-muted:    #64748b;
+  --input-bg:      rgba(255,255,255,0.92);
+  --input-border:  rgba(99,102,241,0.22);
+  --focus-bg:      rgba(245,158,11,0.05);
+  --focus-bd:      #d97706;
+  --focus-shadow:  rgba(245,158,11,0.15);
+  --float-label:   #fef3c7;
+  --chip-bg:       rgba(99,102,241,0.07);
+  --chip-border:   rgba(99,102,241,0.14);
+  --chip-text:     #312e81;
+  --chip-sub:      #6366f1;
+  --divider:       rgba(99,102,241,0.14);
+  --error:         #dc2626;
+}
+
+body {
+  min-height:100vh; display:flex; font-family:'Poppins',sans-serif;
+  background:var(--bg); position:relative; overflow:hidden; transition:background 0.4s;
+}
+body::before {
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background-image: radial-gradient(circle at 80% 20%, rgba(245,158,11,0.12) 0%, transparent 50%),
+                    radial-gradient(circle at 20% 80%, rgba(99,102,241,0.12) 0%, transparent 50%);
+}
+body::after {
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:50px 50px;
+}
+
+/* No toggle on auth pages — theme applied silently from localStorage */
+
+
+
+/* LAYOUT */
+.page-layout { display:flex; width:100%; min-height:100vh; position:relative; z-index:2; }
+
+/* LEFT INFO PANEL */
+.info-panel {
+  flex:1; display:flex; flex-direction:column;
+  justify-content:center; align-items:flex-start;
+  padding:60px 56px; color:var(--text);
+}
+.brand-logo { display:flex; align-items:center; gap:14px; margin-bottom:48px; }
+.logo-badge {
+  width:52px; height:52px;
+  background:linear-gradient(135deg,#f59e0b,#ef4444);
+  border-radius:14px; display:flex; align-items:center;
+  justify-content:center; font-size:26px;
+  box-shadow:0 8px 24px rgba(245,158,11,0.35);
+}
+.logo-text {
+  font-size:22px; font-weight:800;
+  background:linear-gradient(90deg,#fbbf24,#f8fafc);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+[data-theme="light"] .logo-text {
+  background:linear-gradient(90deg,#d97706,#4f46e5);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.info-headline { font-size:36px; font-weight:800; line-height:1.25; margin-bottom:12px; color:var(--text); }
+.info-headline span {
+  background:linear-gradient(90deg,#fbbf24,#f59e0b);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.info-sub { font-size:15px; color:var(--text-sub); margin-bottom:40px; font-family:'Noto Sans Devanagari',sans-serif; line-height:1.7; max-width:380px; }
+
+/* STEP CARDS */
+.steps-list { display:flex; flex-direction:column; gap:12px; max-width:400px; width:100%; }
+.step-card {
+  display:flex; align-items:flex-start; gap:14px;
+  background:var(--chip-bg); border:1px solid var(--chip-border);
+  border-radius:14px; padding:14px 18px;
+  transition:background 0.3s, border-color 0.3s;
+}
+.step-card:hover { filter:brightness(1.08); }
+.step-number {
+  width:34px; height:34px; flex-shrink:0; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px; font-weight:800;
+  background:linear-gradient(135deg,#4f46e5,#7c3aed); color:white;
+  box-shadow:0 4px 12px rgba(99,102,241,0.3);
+}
+.step-title { font-size:14px; font-weight:700; color:var(--chip-text); margin-bottom:3px; }
+.step-desc  { font-size:12px; color:var(--chip-sub); font-family:'Noto Sans Devanagari',sans-serif; line-height:1.5; }
+
+.board-badges { display:flex; gap:10px; margin-top:32px; flex-wrap:wrap; }
+.board-badge  { padding:7px 16px; border-radius:100px; font-size:13px; font-weight:700; border:1px solid; }
+.badge-mp  { background:rgba(245,158,11,0.12); border-color:rgba(245,158,11,0.35); color:#fbbf24; }
+.badge-10  { background:rgba(99,102,241,0.12); border-color:rgba(99,102,241,0.35); color:#818cf8; }
+.badge-12  { background:rgba(16,185,129,0.12); border-color:rgba(16,185,129,0.35); color:#6ee7b7; }
+
+/* RIGHT AUTH PANEL */
+.auth-panel {
+  width:480px; display:flex; align-items:center; justify-content:center;
+  padding:40px 48px;
+  background:var(--panel-bg); border-left:1px solid var(--panel-border);
+  backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+  transition:background 0.4s, border-color 0.4s;
+}
+.auth-card { width:100%; }
+.auth-card h2    { font-size:26px; font-weight:800; color:var(--text); margin-bottom:6px; }
+.welcome-sub     { font-size:14px; color:var(--text-sub); margin-bottom:28px; font-family:'Noto Sans Devanagari',sans-serif; }
+
+/* INPUT */
+.input-wrap { position:relative; margin-bottom:16px; }
+.input-icon {
+  position:absolute; left:16px; top:50%; transform:translateY(-50%);
+  font-size:18px; pointer-events:none; z-index:2;
+}
+.input-wrap input {
+  width:100%; padding:15px 18px;
+  border-radius:14px; border:1.5px solid var(--input-border);
+  outline:none; background:var(--input-bg); color:var(--text);
+  font-size:15px; font-family:'Poppins',sans-serif;
+  transition:border-color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+.input-wrap input::placeholder { color:var(--text-muted); font-size:13px; }
+.input-wrap input:focus {
+  border-color:var(--focus-bd);
+  background:var(--focus-bg);
+  box-shadow:0 0 0 4px var(--focus-shadow);
+}
+
+/* PASSWORD STRENGTH */
+.strength-bar  { height:4px; border-radius:2px; background:rgba(255,255,255,0.1); margin-top:5px; overflow:hidden; }
+.strength-fill { height:100%; border-radius:2px; width:0%; transition:width 0.4s, background 0.4s; background:#ef4444; }
+
+/* ERRORS */
+.error-msg {
+  background:rgba(239,68,68,0.10); border:1px solid rgba(239,68,68,0.25);
+  border-radius:10px; padding:10px 14px; margin-bottom:14px;
+  font-size:13px; color:var(--error); font-weight:500;
+}
+.errorlist { color:var(--error); font-size:12px; list-style:none; margin:-8px 0 10px 6px; }
+
+/* EMAIL HINT */
+.email-hint {
+  font-size:11.5px; color:var(--text-muted); margin:-8px 0 12px 6px;
+  display:flex; align-items:center; gap:5px;
+}
+
+/* BUTTON */
+.btn-submit {
+  width:100%; padding:16px; border:none; border-radius:14px;
+  font-size:16px; font-weight:700; color:white; cursor:pointer;
+  background:linear-gradient(135deg,#d97706,#f59e0b);
+  transition:all 0.3s; position:relative; overflow:hidden;
+  margin-top:8px; font-family:'Poppins',sans-serif;
+  box-shadow:0 8px 24px rgba(245,158,11,0.35);
+}
+.btn-submit::before {
+  content:""; position:absolute; top:0; left:-100%; width:100%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+  transition:left 0.5s;
+}
+.btn-submit:hover::before { left:100%; }
+.btn-submit:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(245,158,11,0.5); }
+
+/* DIVIDER */
+.divider {
+  display:flex; align-items:center; gap:12px;
+  margin:20px 0; color:var(--text-muted); font-size:13px;
+}
+.divider::before, .divider::after { content:""; flex:1; height:1px; background:var(--divider); }
+
+/* FOOTER */
+.auth-footer { text-align:center; margin-top:16px; font-size:14px; color:var(--text-muted); }
+.auth-footer a { color:#fbbf24; text-decoration:none; font-weight:600; transition:color 0.2s; }
+.auth-footer a:hover { color:#fde68a; }
+
+.terms-note { margin-top:14px; font-size:12px; color:var(--text-muted); text-align:center; line-height:1.6; }
+
+@media (max-width:900px) {
+  .info-panel { display:none; }
+  .auth-panel { width:100%; border:none; padding:32px 24px; }
+}
+</style>
+</head>
+<body>
+
+
+
+<div class="page-layout">
+
+  <!-- LEFT: Info Panel -->
+  <div class="info-panel">
+    <div class="brand-logo">
+      <img src="{% static 'images/logo.jpeg' %}" alt="MP Board" style="width:52px;height:52px;border-radius:14px;object-fit:cover;box-shadow:0 8px 24px rgba(0,0,0,0.3);">
+      <span class="logo-text">MP Board Analyzer</span>
+    </div>
+    <h1 class="info-headline anim-fade-up">Start Your <span>Smart</span><br>Exam Journey Today</h1>
+    <p class="info-sub anim-fade-up delay-1">मुफ्त में अकाउंट बनाएं और MP Board परीक्षा की तैयारी को स्मार्ट बनाएं।</p>
+
+    <div class="steps-list">
+      <div class="step-card anim-fade-up delay-2 hover-premium-lift">
+        <div class="step-number">1</div>
+        <div>
+          <div class="step-title">Create your free account</div>
+          <div class="step-desc">बस email और password डालें — बिल्कुल मुफ्त, कोई fees नहीं</div>
+        </div>
+      </div>
+      <div class="step-card anim-fade-up delay-3 hover-premium-lift">
+        <div class="step-number">2</div>
+        <div>
+          <div class="step-title">Select question papers</div>
+          <div class="step-desc">Class 10th या 12th का subject और वर्ष चुनें</div>
+        </div>
+      </div>
+      <div class="step-card anim-fade-up delay-4 hover-premium-lift">
+        <div class="step-number">3</div>
+        <div>
+          <div class="step-title">Get instant analysis &amp; predictions</div>
+          <div class="step-desc">कुछ ही मिनटों में जानें कौन से प्रश्न इस बार आ सकते हैं</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="board-badges anim-fade-up delay-5">
+      <span class="board-badge badge-mp">🏛️ MP Board</span>
+      <span class="board-badge badge-10">📘 Class 10th</span>
+      <span class="board-badge badge-12">📗 Class 12th</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: Signup Card -->
+  <div class="auth-panel">
+    <div class="auth-card anim-spring-up">
+
+      <h2>Join as a Student</h2>
+      <p class="welcome-sub">अपना Email ID से अकाउंट बनाएं और स्मार्ट पढ़ाई शुरू करें।</p>
+
+      {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+          <div class="error-msg">⚠️ {{ error }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="POST" id="signup-form">
+        {% csrf_token %}
+
+        <!-- EMAIL (stored as username) -->
+        <div class="input-wrap">
+          <input type="email" name="username" id="id_username" required
+                 placeholder="Email — yourname@gmail.com / @yahoo.com"
+                 autocomplete="email"
+                 value="{{ form.username.value|default:'' }}">
+        </div>
+        <div class="email-hint">✔ Use a valid email: @gmail.com, @yahoo.com, @outlook.com, etc.</div>
+        {% if form.username.errors %}
+          <ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+
+        <!-- PASSWORD 1 -->
+        <div class="input-wrap" style="position:relative;">
+          <input type="password" name="password1" id="id_password1" required
+                 placeholder="Create a strong password"
+                 autocomplete="new-password" style="padding-right:48px;">
+          <button type="button" id="toggle-p1" onclick="togglePassword('id_password1','toggle-p1')"
+                  style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--text-muted);font-size:18px;line-height:1;z-index:3;"
+                  aria-label="Show/hide password">
+            👁️
+          </button>
+        </div>
+        <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+        {% if form.password1.errors %}
+          <ul class="errorlist" style="margin-top:6px;">{% for e in form.password1.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+
+        <!-- PASSWORD 2 -->
+        <div class="input-wrap" style="margin-top:14px;position:relative;">
+          <input type="password" name="password2" id="id_password2" required
+                 placeholder="Confirm your password"
+                 autocomplete="new-password" style="padding-right:48px;">
+          <button type="button" id="toggle-p2" onclick="togglePassword('id_password2','toggle-p2')"
+                  style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--text-muted);font-size:18px;line-height:1;z-index:3;"
+                  aria-label="Show/hide confirm password">
+            👁️
+          </button>
+        </div>
+        {% if form.password2.errors %}
+          <ul class="errorlist">{% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+
+        <button type="submit" class="btn-submit">
+          Create Account &amp; Start Learning 🎓
+        </button>
+      </form>
+
+      <div class="divider">already a member?</div>
+
+      <div class="auth-footer">
+        <a href="/login/">Login to your account →</a>
+      </div>
+
+      <p class="terms-note">
+        By joining, you agree to use this platform responsibly for<br>
+        your academic preparation. पढ़ाई पर ध्यान दें! 📚
+      </p>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+function togglePassword(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn   = document.getElementById(btnId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+    btn.setAttribute('aria-label', 'Hide password');
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+    btn.setAttribute('aria-label', 'Show password');
+  }
+}
+
+// ── Password strength ──────────────────────────────────
+const p1   = document.getElementById('id_password1');
+const fill = document.getElementById('strength-fill');
+if (p1 && fill) {
+  p1.addEventListener('input', () => {
+    const v = p1.value;
+    let s = 0;
+    if (v.length >= 8)          s++;
+    if (/[A-Z]/.test(v))        s++;
+    if (/[0-9]/.test(v))        s++;
+    if (/[^A-Za-z0-9]/.test(v)) s++;
+    fill.style.width      = (s / 4 * 100) + '%';
+    fill.style.background = ['#ef4444','#ef4444','#f59e0b','#3b82f6','#22c55e'][s];
+  });
+}
+</script>
+</body>
+</html>

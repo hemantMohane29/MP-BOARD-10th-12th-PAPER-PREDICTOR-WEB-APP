@@ -1,0 +1,271 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ session.subject }} Analysis — MP Board Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/global_animations.css' %}">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --blue-deep:#1e3a8a; --blue-mid:#3b82f6; --orange:#f59e0b; --red:#ef4444;
+  --bg:#fafaf9; --white:#ffffff; --ink:#0f172a; --muted:#64748b;
+  --border:#e2e8f0; --shadow:0 4px 6px -1px rgba(0,0,0,0.1);
+  --font-head:'Manrope',sans-serif; --font-body:'Inter',sans-serif; --font-hi:'Noto Sans Devanagari',sans-serif;
+}
+body { font-family: var(--font-body); background: var(--bg); color: var(--ink); margin: 0; padding: 0; }
+
+.main-nav { background:var(--white); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+.nav-container { max-width:1400px; margin:0 auto; padding:16px 32px; display:flex; align-items:center; justify-content:space-between; }
+.nav-brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
+.brand-icon { width:32px; height:32px; background:linear-gradient(135deg,var(--blue-deep),var(--blue-mid)); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; color:white; }
+.brand-name { font-size:20px; font-weight:800; color:var(--blue-deep); font-family:var(--font-head); }
+.nav-menu { display:flex; gap:8px; }
+.nav-link { padding:10px 20px; border-radius:8px; color:var(--muted); font-weight:600; text-decoration:none; transition:all 0.2s; font-size:14px; }
+.nav-link:hover { background:#f1f5f9; color:var(--blue-deep); }
+.nav-link.active { background:linear-gradient(135deg,var(--blue-deep),var(--blue-mid)); color:white; }
+.nav-actions { display:flex; align-items:center; gap:16px; }
+.username { font-size:14px; font-weight:600; color:var(--ink); }
+main { max-width:1100px; margin:32px auto; padding:0 32px 80px; }
+
+/* Session header banner */
+.session-banner { background:linear-gradient(135deg, #0f172a, #1e3a5f); border-radius:20px; padding:32px; margin-bottom:32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+.session-banner h1 { color:white; font-size:26px; font-weight:800; font-family:var(--font-head); margin-bottom:6px; }
+.session-banner p { color:#93c5fd; font-size:14px; }
+.back-btn { background:rgba(255,255,255,0.15); color:white; border:1px solid rgba(255,255,255,0.3); padding:10px 20px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:0.2s; flex-shrink:0; }
+.back-btn:hover { background:rgba(255,255,255,0.25); }
+.btn-logout { font-size:14px; color:#dc2626; font-weight:600; text-decoration:none; }
+
+.tabs-nav { display:flex; gap:12px; margin-bottom:24px; border-bottom:2px solid var(--border); padding-bottom:12px; overflow-x:auto; }
+.tab-btn { background:transparent; border:none; padding:10px 20px; font-size:15px; font-weight:700; color:var(--muted); cursor:pointer; border-radius:8px; transition:0.2s; white-space:nowrap; }
+.tab-btn:hover { background:rgba(0,0,0,0.04); color:var(--ink); }
+.tab-btn.active { background:var(--blue-deep); color:white; }
+.tab-content { display:none; animation:global-spring-up 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.tab-content.active { display:block; }
+</style>
+</head>
+<body>
+
+<nav class="main-nav">
+  <div class="nav-container">
+    <a href="/" class="nav-brand">
+      <img src="{% static 'images/logo.jpeg' %}" alt="Logo" style="width: 32px; height: 32px; border-radius: 8px; object-fit: cover;">
+      <span class="brand-name">MP Board Analyzer</span>
+    </a>
+    <div class="nav-menu">
+      <a href="/dashboard/" class="nav-link">Dashboard</a>
+      <a href="/history/" class="nav-link active">History</a>
+      <a href="/papers/" class="nav-link">Library</a>
+      {% if user.is_superuser %}
+      <a href="/admin/" class="nav-link" style="color: #ea580c; border: 1px dashed #ea580c;">Admin</a>
+      {% endif %}
+    </div>
+    <div class="nav-actions">
+      <span class="username">👤 {{ request.user.username }}</span>
+      <a href="/logout/" class="btn-logout">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="session-banner anim-fade-up">
+    <div>
+      <h1>{{ session.subject }} Analysis — Class {{ session.student_class }}</h1>
+      <p>📅 {{ session.created_at|date:"F d, Y — g:i A" }} &nbsp;|&nbsp; Saved Result</p>
+    </div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+      <a href="/history/" class="back-btn">← Back to History</a>
+      <a href="/results/{{ session.id }}/print/" target="_blank" class="back-btn">
+        Print PDF
+      </a>
+    </div>
+  </div>
+
+  <div id="results-container">Loading saved results...</div>
+</main>
+
+<script>
+const resultData = {{ result_json|safe }};
+
+function getTypeIcon(type) {
+  if (!type) return '📝';
+  if (type.includes('लघु') && type.includes('अति')) return '⚡';
+  if (type.includes('लघु')) return '📄';
+  if (type.includes('दीर्घ')) return '📜';
+  if (type.includes('रिक्त')) return '✏️';
+  if (type.includes('मिलान')) return '🔗';
+  if (type.includes('सत्य')) return '✅';
+  if (type.includes('बहु')) return '🔘';
+  if (type.includes('आंकिक')) return '🔢';
+  return '📝';
+}
+function getTypeColor(type) {
+  if (!type) return '#6366f1';
+  if (type.includes('दीर्घ')) return '#dc2626';
+  if (type.includes('अति')) return '#16a34a';
+  if (type.includes('लघु')) return '#2563eb';
+  if (type.includes('रिक्त')) return '#d97706';
+  if (type.includes('मिलान')) return '#7c3aed';
+  if (type.includes('सत्य')) return '#059669';
+  if (type.includes('बहु')) return '#0891b2';
+  if (type.includes('आंकिक')) return '#c2410c';
+  return '#6366f1';
+}
+
+function render() {
+  const s2 = resultData.stage_2_insights || {};
+  const s3 = resultData.stage_3_predictive_dashboard || {};
+  const repeated  = s2.repeated_questions || [];
+  const predicted = s2.predicted_important_questions || [];
+  predicted.sort((a, b) => (b.star_rating || 3) - (a.star_rating || 3));
+  const strategy  = s3.chapter_wise_strategy || [];
+  const patternAnalysis = s3.pattern_analysis || {};
+  const finalAdvice = s3.final_student_advice || '';
+
+  let html = `
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px; margin-bottom:40px;">
+      <div class="anim-fade-up delay-1 hover-glow-orange" style="background:linear-gradient(135deg, #fffbeb, #fef3c7); border-radius:16px; padding:24px; text-align:center; border:1px solid #fde68a; box-shadow:0 4px 12px rgba(245,158,11,0.08);">
+        <div style="font-size:36px; margin-bottom:12px; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.1));">🎯</div>
+        <div style="font-size:36px; font-weight:800; color:#b45309; line-height:1;">${predicted.length}</div>
+        <div style="font-size:14px; color:#92400e; font-weight:700; margin-top:4px; text-transform:uppercase; letter-spacing:0.5px;">Predicted Important</div>
+      </div>
+      <div class="anim-fade-up delay-2 hover-glow-green" style="background:linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius:16px; padding:24px; text-align:center; border:1px solid #bbf7d0; box-shadow:0 4px 12px rgba(22,163,74,0.08);">
+        <div style="font-size:36px; margin-bottom:12px; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.1));">🔄</div>
+        <div style="font-size:36px; font-weight:800; color:#15803d; line-height:1;">${repeated.length}</div>
+        <div style="font-size:14px; color:#166534; font-weight:700; margin-top:4px; text-transform:uppercase; letter-spacing:0.5px;">Repeated Questions</div>
+      </div>
+      <div class="anim-fade-up delay-3 hover-glow-blue" style="background:linear-gradient(135deg, #eff6ff, #dbeafe); border-radius:16px; padding:24px; text-align:center; border:1px solid #bfdbfe; box-shadow:0 4px 12px rgba(59,130,246,0.08);">
+        <div style="font-size:36px; margin-bottom:12px; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.1));">📚</div>
+        <div style="font-size:36px; font-weight:800; color:#1d4ed8; line-height:1;">${strategy.length}</div>
+        <div style="font-size:14px; color:#1e40af; font-weight:700; margin-top:4px; text-transform:uppercase; letter-spacing:0.5px;">Chapters Covered</div>
+      </div>
+    </div>
+  `;
+
+  // Tabs Navigation
+  html += `
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('predicted-tab')">🎯 Predicted Questions</button>
+      <button class="tab-btn" onclick="switchTab('repeated-tab')">🔄 Repeated Questions</button>
+      <button class="tab-btn" onclick="switchTab('strategy-tab')">📚 Chapter Strategy</button>
+    </div>
+  `;
+
+  /* ── 1. PREDICTED QUESTIONS TAB ── */
+  html += `<div id="predicted-tab" class="tab-content active">`;
+  if (predicted.length) {
+    html += `<div style="display:flex; flex-direction:column; gap:16px; margin-bottom:40px;">`;
+    predicted.forEach((q, idx) => {
+      const tc = getTypeColor(q.question_type), ti = getTypeIcon(q.question_type);
+      const starsCount = q.star_rating || 3;
+      const starsStr = '⭐'.repeat(starsCount);
+      const ratingLabel = starsCount === 5 ? 'Highest Priority' : (starsCount === 4 ? 'High Priority' : 'Medium Priority');
+      html += `<div class="anim-fade-up delay-${Math.min(10, (idx % 10) + 1)} hover-glow-orange" style="background:white; border-radius:16px; padding:24px; border:1px solid #e2e8f0; border-left:6px solid #f59e0b; box-shadow:0 4px 12px rgba(0,0,0,0.04);">
+        <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px;">
+          <span style="background:${tc}15; color:${tc}; font-size:13px; font-weight:800; padding:6px 14px; border-radius:20px; border:1px solid ${tc}40;">${ti} ${q.question_type||'Question'}</span>
+          ${q.marks?`<span style="background:#f0fdf4;color:#166534;font-size:13px;font-weight:800;padding:6px 14px;border-radius:20px;border:1px solid #bbf7d0;">🏆 ${q.marks} Marks</span>`:''}
+          <span style="background:#fef9c3;color:#854d0e;font-size:13px;font-weight:800;padding:6px 14px;border-radius:20px;border:1px solid #fef08a;display:inline-flex;align-items:center;gap:6px;">${starsStr} <span style="opacity:0.8; font-size:12px;">|</span> ${ratingLabel}</span>
+        </div>
+        <p style="color:#0f172a; font-size:18px; font-weight:600; line-height:1.7; font-family:'Noto Sans Devanagari',sans-serif; margin-bottom:16px;">${q.question||q}</p>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; background:#f8fafc; padding:12px 16px; border-radius:12px; border:1px solid #f1f5f9;">
+          ${q.topic?`<div style="display:inline-flex; align-items:center; gap:8px;"><span style="font-size:16px;">📘</span><span style="font-size:14px; font-weight:700; color:#334155;">Topic: ${q.topic}</span></div>`:''}
+          ${q.topic && q.reason ? `<div style="width:1px; height:20px; background:#cbd5e1; margin:0 8px;"></div>` : ''}
+          ${q.reason?`<div style="font-size:14px; color:#b45309; font-weight:600;">💡 Reason: ${q.reason}</div>`:''}
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div style="padding:40px; text-align:center; color:#64748b; background:#f1f5f9; border-radius:16px;">No predicted questions available.</div>`;
+  }
+  html += `</div>`;
+
+  /* ── 2. REPEATED QUESTIONS TAB ── */
+  html += `<div id="repeated-tab" class="tab-content">`;
+  if (repeated.length) {
+    html += `<div style="display:flex; flex-direction:column; gap:16px; margin-bottom:40px;">`;
+    repeated.forEach((q, idx) => {
+      const tc = getTypeColor(q.question_type), ti = getTypeIcon(q.question_type);
+      let yHtml = '';
+      if (q.years) { let ya = Array.isArray(q.years)?q.years:[q.years]; yHtml = ya.map(y=>`<span style="background:#dbeafe;color:#1e40af;font-size:12px;font-weight:800;padding:4px 10px;border-radius:8px;">${y}</span>`).join(''); }
+      html += `<div class="anim-fade-up delay-${Math.min(10, (idx % 10) + 1)} hover-glow-blue" style="background:white; border-radius:16px; padding:24px; border:1px solid #e2e8f0; border-left:6px solid #3b82f6; box-shadow:0 4px 12px rgba(0,0,0,0.04);">
+        <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px;">
+          <span style="background:${tc}15; color:${tc}; font-size:13px; font-weight:800; padding:6px 14px; border-radius:20px; border:1px solid ${tc}40;">${ti} ${q.question_type||'Question'}</span>
+          ${q.marks?`<span style="background:#f0fdf4;color:#166534;font-size:13px;font-weight:800;padding:6px 14px;border-radius:20px;border:1px solid #bbf7d0;">🏆 ${q.marks} Marks</span>`:''}
+          ${q.frequency?`<span style="background:#fff7ed;color:#c2410c;font-size:13px;font-weight:800;padding:6px 14px;border-radius:20px;border:1px solid #ffedd5;">🔁 Repeated ${q.frequency}×</span>`:''}
+        </div>
+        <p style="color:#0f172a; font-size:18px; font-weight:600; line-height:1.7; font-family:'Noto Sans Devanagari',sans-serif; margin-bottom:16px;">${q.question||q}</p>
+        <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; background:#f8fafc; padding:12px 16px; border-radius:12px; border:1px solid #f1f5f9;">
+          ${q.topic?`<div style="display:inline-flex; align-items:center; gap:8px;"><span style="font-size:16px;">📘</span><span style="font-size:14px; font-weight:700; color:#334155;">${q.topic}</span></div>`:''}
+          ${yHtml ? `<div style="display:flex; gap:6px; align-items:center; margin-left:auto;"><span style="font-size:12px; font-weight:600; color:#64748b; text-transform:uppercase;">Years:</span>${yHtml}</div>` : ''}
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div style="padding:40px; text-align:center; color:#64748b; background:#f1f5f9; border-radius:16px;">No repeated questions found.</div>`;
+  }
+  html += `</div>`;
+
+  /* ── 3. CHAPTER STRATEGY TAB ── */
+  html += `<div id="strategy-tab" class="tab-content">`;
+  if (strategy.length) {
+    html += `<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; margin-bottom:24px;">`;
+    strategy.forEach((ch, idx) => {
+      const prio = ch.priority_level || 'Medium';
+      const isHigh = prio.toLowerCase() === 'high';
+      const border = isHigh ? '#ef4444' : '#f59e0b';
+      const bg = isHigh ? 'linear-gradient(135deg, #fef2f2, #fee2e2)' : 'linear-gradient(135deg, #fffbeb, #fef3c7)';
+      const textCol = isHigh ? '#991b1b' : '#92400e';
+      const badge = isHigh ? '#ef4444' : '#f59e0b';
+      html += `<div class="anim-fade-up delay-${Math.min(10, (idx % 10) + 1)} ${isHigh ? 'hover-glow-orange' : 'hover-glow-purple'}" style="background:${bg}; border:1px solid ${border}40; border-top:6px solid ${border}; border-radius:16px; padding:24px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+          <h4 style="color:${textCol}; font-size:18px; font-weight:800; margin:0; line-height:1.4;">${ch.chapter_name||ch.chapter||'Chapter'}</h4>
+          <span style="background:${badge}; color:white; font-size:12px; font-weight:800; padding:4px 12px; border-radius:20px; flex-shrink:0; margin-left:12px; text-transform:uppercase; letter-spacing:0.5px; box-shadow:0 2px 4px ${badge}40;">${prio}</span>
+        </div>
+        <p style="color:#334155; font-size:15px; font-weight:500; line-height:1.7; font-family:'Noto Sans Devanagari',sans-serif; margin:0;">${ch.study_tip||''}</p>
+      </div>`;
+    });
+    html += `</div>`;
+
+    if (patternAnalysis.cyclical_trends || patternAnalysis.emerging_topics) {
+      html += `<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; margin-bottom:40px;">
+        ${patternAnalysis.cyclical_trends?`<div style="background:white; border-radius:16px; padding:24px; border:1px solid #e0e7ff; border-left:6px solid #6366f1; box-shadow:0 4px 12px rgba(0,0,0,0.04);"><div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><span style="font-size:20px;">🔁</span><h4 style="color:#4338ca; font-size:15px; font-weight:800; text-transform:uppercase; margin:0;">Cyclical Trends</h4></div><p style="color:#475569; font-size:15px; line-height:1.7; font-family:'Noto Sans Devanagari',sans-serif; margin:0;">${patternAnalysis.cyclical_trends}</p></div>`:''}
+        ${patternAnalysis.emerging_topics?`<div style="background:white; border-radius:16px; padding:24px; border:1px solid #d1fae5; border-left:6px solid #10b981; box-shadow:0 4px 12px rgba(0,0,0,0.04);"><div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><span style="font-size:20px;">🌟</span><h4 style="color:#047857; font-size:15px; font-weight:800; text-transform:uppercase; margin:0;">Emerging Topics</h4></div><p style="color:#475569; font-size:15px; line-height:1.7; font-family:'Noto Sans Devanagari',sans-serif; margin:0;">${patternAnalysis.emerging_topics}</p></div>`:''}
+      </div>`;
+    }
+  } else {
+    html += `<div style="padding:40px; text-align:center; color:#64748b; background:#f1f5f9; border-radius:16px;">No chapter strategy available.</div>`;
+  }
+  html += `</div>`;
+
+  /* ── 4. FINAL ADVICE (Always visible at bottom) ── */
+  if (finalAdvice) {
+    html += `<div class="anim-fade-up delay-2 hover-glow-blue" style="background:linear-gradient(135deg, #1e3a8a, #312e81); border-radius:20px; padding:32px; margin-top:40px; box-shadow:0 10px 25px rgba(30,58,138,0.2);">
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+        <div style="width:48px; height:48px; background:white; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">🤖</div>
+        <h3 style="color:white; font-size:20px; font-weight:800; margin:0;">AI Study Advice / सलाह</h3>
+      </div>
+      <p style="color:#e0e7ff; font-size:16px; font-weight:500; line-height:1.8; font-family:'Noto Sans Devanagari',sans-serif; margin:0;">${finalAdvice}</p>
+    </div>`;
+  }
+
+  document.getElementById('results-container').innerHTML = html;
+}
+
+render();
+</script>
+
+<script>
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+</script>
+
+</body>
+</html>

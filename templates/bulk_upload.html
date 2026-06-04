@@ -1,0 +1,732 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - MP Board Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/global_animations.css' %}">
+<style>
+/* Base Styles */
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --blue-deep: #1e3a8a; --blue-mid: #3b82f6; --blue-light: #eff6ff;
+  --bg: #f8fafc; --white: #ffffff; --ink: #0f172a; --muted: #64748b;
+  --border: #e2e8f0; --red: #ef4444; --green: #10b981;
+  --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --font-head: 'Manrope', sans-serif; --font-body: 'Inter', sans-serif;
+}
+body { font-family: var(--font-body); background: var(--bg); color: var(--ink); display: flex; min-height: 100vh;}
+
+/* Sidebar */
+.sidebar { width: 280px; background: var(--white); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; height: 100vh; overflow-y: auto;}
+.brand { padding: 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); text-decoration: none;}
+.brand-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white;}
+.brand-name { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--blue-deep); line-height: 1.2;}
+.brand-tag { font-size: 11px; color: var(--muted); font-family: 'Noto Sans Devanagari', sans-serif;}
+.nav-menu { padding: 24px 16px; flex-grow: 1; display: flex; flex-direction: column; gap: 8px;}
+.nav-item { padding: 12px 16px; border-radius: 8px; color: var(--muted); font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 12px; transition: 0.2s;}
+.nav-item:hover { background: var(--bg); color: var(--ink); }
+.nav-item.active { background: var(--blue-light); color: var(--blue-mid); }
+.nav-icon { font-size: 18px; }
+.user-info { padding: 24px; border-top: 1px solid var(--border); font-size: 14px; color: var(--muted); display: flex; justify-content: space-between; align-items: center;}
+.logout-btn { color: var(--red); font-weight: 600; text-decoration: none;}
+
+/* Main Content */
+.main-content { margin-left: 280px; padding: 40px; flex-grow: 1; max-width: 1200px; }
+.page-header { margin-bottom: 32px; }
+.page-header h1 { font-family: var(--font-head); font-size: 32px; font-weight: 800; color: var(--ink); margin-bottom: 8px;}
+.page-header p { color: var(--muted); font-size: 15px;}
+
+/* Upload Card */
+.card { background: var(--white); border-radius: 16px; padding: 32px; box-shadow: var(--shadow); margin-bottom: 40px; border-top: 4px solid var(--blue-mid);}
+.card-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 8px;}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;}
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+label { font-weight: 600; font-size: 14px; color: var(--ink); }
+select, input[type="file"] { width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 8px; font-size: 15px; font-family: inherit; transition: all 0.2s; outline: none; background: var(--bg);}
+select:focus { border-color: var(--blue-mid); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+input[type="file"] { cursor: pointer; }
+.btn-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); color: white; padding: 14px 32px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s;}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+
+/* Alerts */
+.alert { padding: 16px; border-radius: 8px; margin-bottom: 24px; font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 12px;}
+.alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+/* Papers Table */
+.table-container { background: var(--white); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden;}
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: 16px 24px; border-bottom: 1px solid var(--border); }
+th { background: #f8fafc; font-weight: 600; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+td { font-size: 15px; color: var(--ink); font-weight: 500;}
+.badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+.badge-class { background: var(--blue-light); color: var(--blue-deep); }
+.badge-year { background: #f1f5f9; color: var(--muted); }
+.btn-delete { background: none; border: none; color: var(--red); font-size: 14px; font-weight: 600; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: 0.2s;}
+.btn-delete:hover { background: #fee2e2; }
+
+@media(max-width: 1024px) {
+  .sidebar { display: none; }
+  .main-content { margin-left: 0; padding: 24px; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+/* --- Accordion Styles --- */
+.class-accordion {
+  background: var(--white);
+  border-radius: 16px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.class-accordion-header {
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  background: #f8fafc;
+  user-select: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.3s;
+}
+.class-accordion-header:hover {
+  background: #f1f5f9;
+}
+.class-accordion.active .class-accordion-header {
+  border-bottom-color: var(--border);
+  background: #eff6ff;
+}
+.class-accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0 24px;
+}
+.class-accordion.active .class-accordion-content {
+  max-height: 5000px;
+  padding: 24px;
+}
+.accordion-caret {
+  font-size: 14px;
+  transition: transform 0.3s;
+  color: var(--muted);
+}
+.class-accordion.active .accordion-caret {
+  transform: rotate(180deg);
+}
+
+/* --- Subject Group Styles --- */
+.subject-group {
+  margin-bottom: 32px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.subject-header {
+  background: #f8fafc;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.subject-icon-bullet {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blue-mid);
+  display: inline-block;
+}
+
+/* --- Selection / Checkbox Styles --- */
+.paper-select-cb, .select-all-subject-cb {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--blue-deep);
+}
+
+/* --- Row Delete Keyframe & Class --- */
+@keyframes row-fade-out {
+  from { opacity: 1; transform: scale(1); background: transparent; }
+  to { opacity: 0; transform: scale(0.96) translateY(-10px); background: rgba(239, 68, 68, 0.08); height: 0; padding: 0; border: none; }
+}
+.row-deleting {
+  animation: row-fade-out 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+.paper-table-row {
+  transition: background-color 0.2s, opacity 0.25s;
+}
+.paper-table-row:hover {
+  background-color: #f8fafc;
+}
+
+/* --- Bulk Actions Toolbar --- */
+.bulk-actions-toolbar {
+  position: fixed;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95%;
+  max-width: 780px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 2px solid #ea580c;
+  border-radius: 24px;
+  padding: 18px 28px;
+  box-shadow: 0 25px 60px -12px rgba(234, 88, 12, 0.25), 0 0 30px rgba(234, 88, 12, 0.15);
+  z-index: 1000;
+  transition: bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.bulk-actions-toolbar.show {
+  bottom: 30px;
+}
+.toolbar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: nowrap;
+}
+.toolbar-info {
+  font-weight: 700;
+  font-size: 15px;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.selected-count-badge {
+  background: #ea580c;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3);
+}
+.btn-toolbar-cancel {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+.btn-toolbar-cancel:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+.btn-toolbar-delete {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 4px 12px rgba(220,38,38,0.25);
+  white-space: nowrap;
+}
+.btn-toolbar-delete:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(220,38,38,0.4);
+}
+.btn-delete-row {
+  background: none;
+  border: none;
+  color: var(--red);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+.btn-delete-row:hover {
+  background: #fee2e2;
+}
+
+/* --- Custom Confirm Modal --- */
+.confirm-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.confirm-modal-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+.confirm-modal-box {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px 40px;
+  width: 90%;
+  max-width: 480px;
+  text-align: center;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 40px rgba(234, 88, 12, 0.1);
+  transform: scale(0.95);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.confirm-modal-overlay.show .confirm-modal-box {
+  transform: scale(1);
+}
+.btn-modal-cancel {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-modal-cancel:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+.btn-modal-confirm {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  border: none;
+  color: white;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(220,38,38,0.25);
+  white-space: nowrap;
+}
+.btn-modal-confirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(220,38,38,0.4);
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a href="/" class="brand">
+    <img src="{% static 'images/logo.jpeg' %}" alt="Logo" style="width: 36px; height: 36px; border-radius: 8px; object-fit: cover;">
+    <div>
+      <div class="brand-name">MP Board Analyzer</div>
+      <div class="brand-tag">Admin Dashboard</div>
+    </div>
+  </a>
+  <nav class="nav-menu">
+    <a href="/admin/" class="nav-item active">
+      <span class="nav-icon">📤</span> Bulk Upload
+    </a>
+    <a href="/dashboard/" class="nav-item">
+      <span class="nav-icon">📊</span> View App Dashboard
+    </a>
+  </nav>
+  <div class="user-info">
+    <span>👤 {{ user.username }}</span>
+    <a href="/logout/" class="logout-btn">Logout</a>
+  </div>
+</aside>
+
+<main class="main-content">
+  <div class="page-header anim-fade-up">
+    <h1>Manage Library Papers</h1>
+    <p>Upload new PDF or Image question papers and manage your existing database.</p>
+  </div>
+
+  {% if success %}
+      <div class="alert alert-success">✅ {{ success }}</div>
+  {% endif %}
+  
+  {% if error %}
+      <div class="alert alert-error">❌ {{ error }}</div>
+  {% endif %}
+
+  <div class="card anim-fade-up delay-1">
+    <div class="card-title">📤 Bulk Upload New Papers</div>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-grid">
+          <div class="form-group">
+              <label>Student Class</label>
+              <select name="student_class" required>
+                  <option value="10th">Class 10th</option>
+                  <option value="12th">Class 12th</option>
+              </select>
+          </div>
+          <div class="form-group">
+              <label>Subject</label>
+              <select name="subject" required>
+                  <option value="Science">Science / विज्ञान</option>
+                  <option value="Maths">Maths / गणित</option>
+                  <option value="Hindi">Hindi / हिंदी</option>
+                  <option value="English">English / अंग्रेजी</option>
+                  <option value="SocialScience">Social Science / सामाजिक विज्ञान</option>
+                  <option value="Physics">Physics / भौतिकी</option>
+                  <option value="Chemistry">Chemistry / रसायन विज्ञान</option>
+                  <option value="Biology">Biology / जीव विज्ञान</option>
+              </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 24px;">
+            <label>Select PDF or Image Files (You can select multiple)</label>
+            <input type="file" name="pdf_files" accept=".pdf,image/*" multiple required>
+            <span style="font-size:13px; color:var(--muted); margin-top:4px;">The system will automatically extract the year from your filenames (e.g., Physics_12th_2026.jpg → 2026). Supports PDF and Images (.jpg, .png, etc.)</span>
+        </div>
+
+        <button type="submit" class="btn-submit">Upload Papers</button>
+    </form>
+  </div>
+
+  <div class="card anim-fade-up delay-2" style="border-top-color: var(--orange); margin-bottom: 40px;">
+    <div class="card-title">👑 Admin Management</div>
+    <p style="color: var(--muted); font-size: 14px; margin-bottom: 24px;">Upgrade an existing student to Admin, or create a new admin account.</p>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="make_admin">
+        <div class="form-group" style="margin-bottom: 16px;">
+            <label>Email Address</label>
+            <input type="email" name="admin_email" placeholder="e.g., student@gmail.com" required style="max-width: 400px;">
+        </div>
+        <button type="submit" class="btn-submit" style="background: linear-gradient(135deg, #ea580c, #f97316);">Grant Admin Access</button>
+    </form>
+  </div>
+
+  <div class="page-header anim-fade-up delay-3" style="margin-bottom: 16px; display:flex; justify-content:space-between; align-items:flex-end;">
+    <h2 style="font-family: var(--font-head); font-size: 24px; font-weight: 800;">📚 Existing Papers in Library</h2>
+    <span style="color:var(--muted); font-size:14px;">Total: <span class="total-count-badge">{{ papers|length }}</span></span>
+  </div>
+
+  <div class="existing-papers-section">
+    <div class="class-accordion-container">
+      {% for class_name, subjects in categorized_papers.items %}
+        <div class="class-accordion anim-fade-up delay-{{ forloop.counter }}">
+          <div class="class-accordion-header" onclick="toggleClassAccordion(this)">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:24px;">🎓</span>
+              <h3 style="font-family:var(--font-head); font-weight:800; font-size:18px; color:var(--blue-deep);">Class {{ class_name }} Papers</h3>
+            </div>
+            <span class="accordion-caret">▼</span>
+          </div>
+          <div class="class-accordion-content">
+            {% for subject_name, paper_list in subjects.items %}
+              <div class="subject-group">
+                <div class="subject-header">
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <span class="subject-icon-bullet"></span>
+                    <h4 style="font-weight:700; font-size:15px; color:var(--ink);">{{ subject_name }} ({{ paper_list|length }} paper{{ paper_list|length|pluralize }})</h4>
+                  </div>
+                  <div>
+                    <label style="font-size:13px; color:var(--muted); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                      <input type="checkbox" class="select-all-subject-cb" onclick="toggleSelectAllSubject(this, '{{ class_name }}-{{ subject_name }}')"> Select All / सभी चुनें
+                    </label>
+                  </div>
+                </div>
+                <div class="table-container" style="box-shadow:none; border-radius:0; border-top:none;">
+                  <table style="border-collapse:collapse;">
+                    <thead>
+                      <tr>
+                        <th style="width:40px; text-align:center;"></th>
+                        <th>Title / शीर्षक</th>
+                        <th>Year / वर्ष</th>
+                        <th style="width:120px; text-align:center;">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for paper in paper_list %}
+                        <tr id="paper-row-{{ paper.id }}" class="paper-table-row">
+                          <td style="text-align:center;">
+                            <input type="checkbox" class="paper-select-cb" value="{{ paper.id }}" data-group="{{ class_name }}-{{ subject_name }}" onclick="onPaperSelectChange()">
+                          </td>
+                          <td>
+                            <div style="font-weight:600; color:var(--ink); font-size:14px;">{{ paper.title }}</div>
+                          </td>
+                          <td>
+                            <span class="badge badge-year" style="font-size:11px;">{{ paper.year }}</span>
+                          </td>
+                          <td style="text-align:center;">
+                            <button class="btn-delete-row" onclick="deleteSinglePaper('{{ paper.id }}')">Delete</button>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            {% empty %}
+              <div style="text-align:center; padding:30px; color:var(--muted); font-weight:500;">No papers loaded for Class {{ class_name }} yet.</div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- BULK ACTIONS TOOLBAR -->
+  <div class="bulk-actions-toolbar" id="bulk-actions-toolbar">
+    <div class="toolbar-inner">
+      <div class="toolbar-info">
+        <span class="selected-count-badge" id="selected-count-badge">0</span>
+        <div style="display:flex; flex-direction:column; gap:2px; text-align:left;">
+          <span style="font-size: 13px; font-weight: 700; color: #475569; letter-spacing:0.3px;">Selected Papers</span>
+          <span style="font-family: var(--font-hi); font-size: 16px; font-weight: 800; color: #ea580c;">चयनित प्रश्न पत्र</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <button class="btn-toolbar-cancel" onclick="clearAllSelections()">Cancel / रद्द करें</button>
+        <button class="btn-toolbar-delete" onclick="deleteSelectedPapers()">🗑️ Delete Selected / चयनित हटाएं</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Confirm Modal -->
+  <div class="confirm-modal-overlay" id="confirm-modal">
+    <div class="confirm-modal-box">
+      <div style="font-size: 44px; margin-bottom: 16px; animation: global-pulse-warning 2s infinite; display: inline-block;">⚠️</div>
+      <h3 style="font-family: var(--font-head); font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 10px;">Are you sure? / क्या आप निश्चित हैं?</h3>
+      <p style="font-size: 14px; color: #475569; line-height: 1.5; margin-bottom: 6px;" id="confirm-modal-text-en">Are you sure you want to delete this paper?</p>
+      <p style="font-family: var(--font-hi); font-size: 16px; font-weight: 800; color: #ea580c; line-height: 1.6; margin-bottom: 24px;" id="confirm-modal-text-hi">क्या आप वास्तव में इस प्रश्न पत्र को हटाना चाहते हैं?</p>
+      <div style="display: flex; gap: 12px; justify-content: center; align-items: center;">
+        <button class="btn-modal-cancel" id="btn-modal-cancel">Cancel / रद्द करें</button>
+        <button class="btn-modal-confirm" id="btn-modal-confirm">🗑️ Yes, Delete / हाँ, हटाएँ</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // Toggle Class Accordions
+  function toggleClassAccordion(header) {
+    const accordion = header.closest('.class-accordion');
+    accordion.classList.toggle('active');
+  }
+
+  // Select All Subject checkboxes
+  function toggleSelectAllSubject(selectAllCb, groupName) {
+    const checkboxes = document.querySelectorAll(`.paper-select-cb[data-group="${groupName}"]`);
+    checkboxes.forEach(cb => {
+      cb.checked = selectAllCb.checked;
+    });
+    onPaperSelectChange();
+  }
+
+  // Sync states on checkbox click
+  function onPaperSelectChange() {
+    const selectedCbs = document.querySelectorAll('.paper-select-cb:checked');
+    const count = selectedCbs.length;
+    
+    document.getElementById('selected-count-badge').textContent = count;
+    
+    const toolbar = document.getElementById('bulk-actions-toolbar');
+    if (count > 0) {
+      toolbar.classList.add('show');
+    } else {
+      toolbar.classList.remove('show');
+    }
+    
+    // Get unique group names
+    const groups = new Set();
+    document.querySelectorAll('.paper-select-cb').forEach(cb => {
+      groups.add(cb.getAttribute('data-group'));
+    });
+    
+    groups.forEach(g => {
+      const allCbs = document.querySelectorAll(`.paper-select-cb[data-group="${g}"]`);
+      const checkedCbs = document.querySelectorAll(`.paper-select-cb[data-group="${g}"]:checked`);
+      const selectAllCb = document.querySelector(`.select-all-subject-cb[onclick*="${g}"]`);
+      if (selectAllCb) {
+        selectAllCb.checked = (allCbs.length > 0 && allCbs.length === checkedCbs.length);
+      }
+    });
+  }
+
+  // Reset checkboxes
+  function clearAllSelections() {
+    document.querySelectorAll('.paper-select-cb, .select-all-subject-cb').forEach(cb => {
+      cb.checked = false;
+    });
+    onPaperSelectChange();
+  }
+
+  // Cookie helper for csrf token
+  function getCookie(name) {
+    let val = null;
+    document.cookie.split(';').forEach(c => {
+      c = c.trim();
+      if (c.startsWith(name + '=')) val = decodeURIComponent(c.substring(name.length + 1));
+    });
+    return val;
+  }
+
+  // --- Custom Confirm Modal Promise Handler ---
+  let modalCallback = null;
+
+  function showConfirmModal(messageEn, messageHi) {
+    return new Promise((resolve) => {
+      document.getElementById('confirm-modal-text-en').textContent = messageEn;
+      document.getElementById('confirm-modal-text-hi').textContent = messageHi;
+      
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.add('show');
+      
+      modalCallback = (confirmed) => {
+        modal.classList.remove('show');
+        resolve(confirmed);
+      };
+    });
+  }
+
+  // Bind Confirm Modal Buttons
+  document.getElementById('btn-modal-confirm').addEventListener('click', () => {
+    if (modalCallback) modalCallback(true);
+  });
+  document.getElementById('btn-modal-cancel').addEventListener('click', () => {
+    if (modalCallback) modalCallback(false);
+  });
+
+  // AJAX single row deletion
+  async function deleteSinglePaper(paperId) {
+    const confirmed = await showConfirmModal(
+      'Are you sure you want to delete this paper?',
+      'क्या आप वास्तव में इस प्रश्न पत्र को हटाना चाहते हैं?'
+    );
+    if (!confirmed) return;
+    
+    const row = document.getElementById(`paper-row-${paperId}`);
+    if (row) row.classList.add('row-deleting');
+    
+    try {
+      const res = await fetch(`/admin/delete/${paperId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (res.ok) {
+        setTimeout(() => {
+          if (row) {
+            const tbody = row.closest('tbody');
+            row.remove();
+            
+            // If subject table is completely empty, remove the group
+            if (tbody && tbody.children.length === 0) {
+              const group = tbody.closest('.subject-group');
+              if (group) group.remove();
+            }
+            updateTotalCount();
+          }
+        }, 450);
+      } else {
+        alert('Failed to delete paper.');
+        if (row) row.classList.remove('row-deleting');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred.');
+      if (row) row.classList.remove('row-deleting');
+    }
+  }
+
+  // AJAX bulk deletion
+  async function deleteSelectedPapers() {
+    const selectedCbs = document.querySelectorAll('.paper-select-cb:checked');
+    const paperIds = Array.from(selectedCbs).map(cb => parseInt(cb.value));
+    
+    if (paperIds.length === 0) return;
+    const confirmed = await showConfirmModal(
+      `Are you sure you want to delete ${paperIds.length} selected papers?`,
+      `क्या आप वास्तव में ${paperIds.length} चयनित प्रश्न पत्रों को हटाना चाहते हैं?`
+    );
+    if (!confirmed) return;
+    
+    paperIds.forEach(id => {
+      const row = document.getElementById(`paper-row-${id}`);
+      if (row) row.classList.add('row-deleting');
+    });
+    
+    try {
+      const res = await fetch('/admin/delete-bulk/', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ paper_ids: paperIds })
+      });
+      
+      if (res.ok) {
+        setTimeout(() => {
+          paperIds.forEach(id => {
+            const row = document.getElementById(`paper-row-${id}`);
+            if (row) {
+              const tbody = row.closest('tbody');
+              row.remove();
+              if (tbody && tbody.children.length === 0) {
+                const group = tbody.closest('.subject-group');
+                if (group) group.remove();
+              }
+            }
+          });
+          clearAllSelections();
+          updateTotalCount();
+        }, 450);
+      } else {
+        alert('Failed to delete selected papers.');
+        paperIds.forEach(id => {
+          const row = document.getElementById(`paper-row-${id}`);
+          if (row) row.classList.remove('row-deleting');
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred during bulk deletion.');
+      paperIds.forEach(id => {
+        const row = document.getElementById(`paper-row-${id}`);
+        if (row) row.classList.remove('row-deleting');
+      });
+    }
+  }
+
+  // Recount elements
+  function updateTotalCount() {
+    const remainingRows = document.querySelectorAll('.paper-table-row');
+    const countEl = document.querySelector('.total-count-badge');
+    if (countEl) {
+      countEl.textContent = remainingRows.length;
+    }
+  }
+  </script>
+
+</main>
+
+</body>
+</html>

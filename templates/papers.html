@@ -1,0 +1,211 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paper Library - MP Board Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/global_animations.css' %}">
+<style>
+/* Base Styles */
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --blue-deep: #1e3a8a; --blue-mid: #3b82f6; --blue-light: #60a5fa;
+  --bg: #fafaf9; --white: #ffffff; --ink: #0f172a; --muted: #64748b;
+  --border: #e2e8f0; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  --font-head: 'Manrope', sans-serif; --font-body: 'Inter', sans-serif; --font-hi: 'Noto Sans Devanagari', sans-serif;
+}
+body { font-family: var(--font-body); background: var(--bg); color: var(--ink); margin: 0; padding: 0; }
+
+/* Navigation */
+.main-nav { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.nav-container { max-width: 1400px; margin: 0 auto; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none;}
+.brand-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white;}
+.brand-name { font-size: 20px; font-weight: 800; color: var(--blue-deep); font-family: var(--font-head); }
+.nav-menu { display: flex; gap: 8px; }
+.nav-link { padding: 10px 20px; border-radius: 8px; color: var(--muted); font-weight: 600; text-decoration: none; transition: all 0.2s; font-size: 14px;}
+.nav-link:hover { background: #f1f5f9; color: var(--blue-deep); }
+.nav-link.active { background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); color: white; }
+.nav-actions { display: flex; align-items: center; gap: 16px; }
+.username { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+/* Main Content */
+main { max-width: 1400px; margin: 32px auto; padding: 0 32px; }
+.page-header { margin-bottom: 32px; border-bottom: 2px solid var(--border); padding-bottom: 16px;}
+.page-header h1 { font-family: var(--font-head); font-size: 32px; font-weight: 800; color: var(--ink); margin-bottom: 8px;}
+.page-header p { color: var(--muted); font-family: var(--font-hi); font-size: 16px;}
+
+.papers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-bottom: 40px; }
+.paper-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); border-top: 4px solid var(--blue-mid); display: flex; flex-direction: column;}
+.paper-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+.paper-year-badge { background: #f1f5f9; color: var(--ink); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+.paper-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.paper-title-hi { font-family: var(--font-hi); font-size: 13px; color: var(--muted); margin-bottom: 16px; flex-grow: 1;}
+.paper-meta { display: flex; gap: 12px; font-size: 12px; color: var(--muted); font-weight: 500; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border);}
+
+/* Loader */
+#loader { text-align: center; padding: 60px 20px; }
+.spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--blue-mid); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Responsive */
+@media(max-width: 768px) {
+  .nav-container { flex-direction: column; gap: 12px; padding: 16px; }
+  main { padding: 0 16px; }
+}
+
+/* Download button */
+.btn-download {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 14px; padding: 8px 16px;
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+  color: white; border: none; border-radius: 8px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  text-decoration: none; transition: all 0.2s; width: 100%;
+  justify-content: center;
+}
+.btn-download:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.35); }
+</style>
+</head>
+<body>
+
+<nav class="main-nav">
+  <div class="nav-container">
+    <a href="/" class="nav-brand">
+      <img src="{% static 'images/logo.jpeg' %}" alt="Logo" style="width: 32px; height: 32px; border-radius: 8px; object-fit: cover;">
+      <span class="brand-name">MP Board Analyzer</span>
+    </a>
+    <div class="nav-menu">
+      <a href="/dashboard/" class="nav-link">Dashboard</a>
+      <a href="/history/" class="nav-link">History</a>
+      <a href="/papers/" class="nav-link active">Library</a>
+      {% if user.is_superuser %}
+      <a href="/admin/" class="nav-link" style="color: #ea580c; border: 1px dashed #ea580c;">Admin</a>
+      {% endif %}
+    </div>
+    <div class="nav-actions">
+      <span class="username">👤 {{ user.username }}</span>
+      <a href="/logout/" style="font-size: 14px; color: #dc2626; font-weight: 600; text-decoration: none;">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="page-header anim-fade-up">
+    <h1>Paper Library</h1>
+    <p>Browse all available MP Board question papers in our database. / हमारे डेटाबेस में उपलब्ध सभी एमपी बोर्ड प्रश्न पत्र देखें।</p>
+  </div>
+
+  <div id="loader">
+    <div class="spinner"></div>
+    <div style="color: var(--muted);">Loading library...</div>
+  </div>
+
+  <div id="papers-container">
+    <!-- Injected by JS, grouped by subject -->
+  </div>
+</main>
+
+<script>
+const subjectIcons = {
+  'Science':'🔬', 'Physics':'⚛️', 'Chemistry':'🧪', 'Biology':'🌿',
+  'Maths':'📐', 'Hindi':'📖', 'English':'📝', 'SocialScience':'🌍'
+};
+const subjectColors = {
+  'Science':'#0ea5e9','Physics':'#8b5cf6','Chemistry':'#f59e0b',
+  'Biology':'#10b981','Maths':'#ef4444','Hindi':'#f97316',
+  'English':'#06b6d4','SocialScience':'#64748b'
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const container = document.getElementById('papers-container');
+  const loader    = document.getElementById('loader');
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  try {
+    const res  = await fetch('/api/papers/all/');
+    const data = await res.json();
+    loader.style.display = 'none';
+
+    if (!data.count) {
+      container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--muted);">No papers available in the library yet.</div>`;
+      return;
+    }
+
+    // Group by subject and class, then sort each group by year descending
+    const groups = {};
+    data.papers.forEach(p => {
+      const key = `${p.subject}|${p.student_class}`;
+      if (!groups[key]) groups[key] = { subject: p.subject, student_class: p.student_class, papers: [] };
+      groups[key].papers.push(p);
+    });
+    Object.keys(groups).forEach(key => {
+      groups[key].papers.sort((a, b) => b.year - a.year);
+    });
+
+    // Render each subject+class section
+    let html = '';
+    Object.values(groups).forEach(group => {
+      const subject = group.subject;
+      const sclass = group.student_class;
+      const papers = group.papers;
+      const icon  = subjectIcons[subject]  || '📄';
+      const color = subjectColors[subject] || '#3b82f6';
+      html += `
+        <div class="anim-fade-up" style="margin-bottom: 48px;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; padding-bottom:12px; border-bottom:3px solid ${color}30;">
+            <div style="width:42px; height:42px; background:${color}15; border:2px solid ${color}40; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px;">${icon}</div>
+            <div>
+              <h2 style="font-family:var(--font-head); font-size:22px; font-weight:800; color:var(--ink);">${subject} <span style="font-size:16px; color:var(--muted); font-weight:600;">(${sclass})</span></h2>
+              <span style="font-size:13px; color:${color}; font-weight:600;">${papers.length} paper${papers.length>1?'s':''} available</span>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px;">
+            ${papers.map((p, idx) => `
+              <div class="paper-card anim-fade-up delay-${Math.min(10, (idx % 10) + 1)} hover-premium-lift" style="border-top-color:${color};">
+                <div class="paper-header">
+                  <span class="paper-year-badge" style="background:${color}15; color:${color};">${p.year}</span>
+                  ${p.set_name ? `<span style="font-size:12px; color:var(--muted); font-weight:600;">${p.set_name}</span>` : ''}
+                </div>
+                <div class="paper-title">${p.title}</div>
+                <div class="paper-title-hi">${p.title_hindi || ''}</div>
+                <div class="paper-meta" style="flex-wrap: wrap; gap: 8px 12px;">
+                  <span>📝 ${p.total_marks} Marks</span>
+                  <span>${icon} ${p.subject} (${p.student_class})</span>
+                  ${p.uploaded_at ? `<span style="width:100%; font-size:11px; color:var(--muted); margin-top:4px; display:inline-flex; align-items:center; gap:4px;">📅 Uploaded: ${formatDate(p.uploaded_at)}</span>` : ''}
+                </div>
+                <a href="/papers/download/${p.id}/" class="btn-download">
+                  ⬇️ Download Paper
+                </a>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+
+  } catch (err) {
+    console.error(err);
+    loader.style.display = 'none';
+    container.innerHTML = `<div style="color:#dc2626; text-align:center;">Failed to load papers.</div>`;
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analysis History - MP Board Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/global_animations.css' %}">
+<style>
+/* Base Styles */
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --blue-deep: #1e3a8a; --blue-mid: #3b82f6;
+  --bg: #fafaf9; --white: #ffffff; --ink: #0f172a; --muted: #64748b;
+  --border: #e2e8f0; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  --font-head: 'Manrope', sans-serif; --font-body: 'Inter', sans-serif; --font-hi: 'Noto Sans Devanagari', sans-serif;
+}
+body { font-family: var(--font-body); background: var(--bg); margin: 0; padding: 0; }
+
+/* Navigation */
+.main-nav { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.nav-container { max-width: 1400px; margin: 0 auto; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none;}
+.brand-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white;}
+.brand-name { font-size: 20px; font-weight: 800; color: var(--blue-deep); font-family: var(--font-head); }
+.nav-menu { display: flex; gap: 8px; }
+.nav-link { padding: 10px 20px; border-radius: 8px; color: var(--muted); font-weight: 600; text-decoration: none; transition: all 0.2s; font-size: 14px;}
+.nav-link:hover { background: #f1f5f9; color: var(--blue-deep); }
+.nav-link.active { background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); color: white; }
+.nav-actions { display: flex; align-items: center; gap: 16px; }
+.username { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+/* Main Content */
+main { max-width: 1000px; margin: 32px auto; padding: 0 32px; }
+.page-header { margin-bottom: 32px; border-bottom: 2px solid var(--border); padding-bottom: 16px;}
+.page-header h1 { font-family: var(--font-head); font-size: 32px; font-weight: 800; color: var(--ink); margin-bottom: 8px;}
+.page-header p { color: var(--muted); font-family: var(--font-hi); font-size: 16px;}
+
+.history-list { display: flex; flex-direction: column; gap: 16px; }
+.session-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;}
+.session-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); border-color: var(--blue-light); }
+.session-info h3 { font-family: var(--font-head); font-size: 18px; font-weight: 700; margin-bottom: 4px;}
+.session-meta { display: flex; gap: 16px; font-size: 13px; color: var(--muted); }
+.status-badge { padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; }
+.status-completed { background: #dcfce7; color: #166534; }
+.status-failed { background: #fee2e2; color: #991b1b; }
+.status-pending { background: #fef3c7; color: #92400e; }
+
+/* Responsive */
+@media(max-width: 768px) {
+  .nav-container { flex-direction: column; gap: 12px; padding: 16px; }
+  main { padding: 0 16px; }
+  .session-card { flex-direction: column; align-items: flex-start; gap: 12px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="main-nav">
+  <div class="nav-container">
+    <a href="/" class="nav-brand">
+      <img src="{% static 'images/logo.jpeg' %}" alt="Logo" style="width: 32px; height: 32px; border-radius: 8px; object-fit: cover;">
+      <span class="brand-name">MP Board Analyzer</span>
+    </a>
+    <div class="nav-menu">
+      <a href="/dashboard/" class="nav-link">Dashboard</a>
+      <a href="/history/" class="nav-link active">History</a>
+      <a href="/papers/" class="nav-link">Library</a>
+      {% if user.is_superuser %}
+      <a href="/admin/" class="nav-link" style="color: #ea580c; border: 1px dashed #ea580c;">Admin</a>
+      {% endif %}
+    </div>
+    <div class="nav-actions">
+      <span class="username">👤 {{ user.username }}</span>
+      <a href="/logout/" style="font-size: 14px; color: #dc2626; font-weight: 600; text-decoration: none;">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="page-header anim-fade-up">
+    <h1>My Analysis History</h1>
+    <p>View your previous AI analysis sessions. / अपने पिछले एआई विश्लेषण सत्र देखें।</p>
+  </div>
+
+  <div class="history-list">
+    {% for session in sessions %}
+    <div class="session-card anim-fade-up delay-{{ forloop.counter }} hover-premium-lift">
+      <div class="session-info">
+        <h3>{{ session.subject }} Analysis</h3>
+        <div class="session-meta">
+          <span>📅 {{ session.created_at|date:"M d, Y" }}</span>
+          <span>🎓 Class: {{ session.student_class }}</span>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
+        {% if session.status == 'completed' %}
+          <span class="status-badge status-completed">✅ Completed</span>
+          <a href="/results/{{ session.id }}/" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; display:inline-flex; align-items:center; gap:6px; transition: 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+            👁️ View Results
+          </a>
+        {% elif session.status == 'failed' %}
+          <span class="status-badge status-failed">❌ Failed</span>
+          {% if session.error_message %}
+          <span style="font-size: 12px; color:#991b1b; background:#fee2e2; padding:4px 10px; border-radius:6px; max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ session.error_message }}">{{ session.error_message|truncatechars:50 }}</span>
+          {% endif %}
+        {% else %}
+          <span class="status-badge status-pending">⏳ Processing</span>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div style="text-align:center; padding: 40px; color: var(--muted); background: var(--white); border-radius: 12px; border: 1px dashed var(--border);">
+      <p style="font-size: 40px; margin-bottom: 16px;">🔍</p>
+      <p>No analysis history found. Go to Dashboard to start a new analysis.</p>
+    </div>
+    {% endfor %}
+  </div>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Django
+db.sqlite3
+*.log
+error_log.txt
+/media/
+/staticfiles/
+/static_collected/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Database
+*.db
+*.sqlite3
+
+# Media files
+/media/uploads/
+/media/processed/
+
+# Python package management
+pip-log.txt
+pip-delete-this-directory.txt
+dist/
+build/
+*.egg-info/
+*.egg
+.eggs/
+
+# Testing
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+.mypy_cache/
+
+# Diagrams (optional - keep if source files are needed)
+# *.puml - if you want to keep PlantUML files in repo, remove this line
+
+# Custom files
+fetch_error.py   # if this contains credentials or sensitive data

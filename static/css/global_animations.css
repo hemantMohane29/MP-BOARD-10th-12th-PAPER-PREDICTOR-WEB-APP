@@ -1,0 +1,188 @@
+/* ═══════════════════════════════════════════
+   MP Board Analyzer - Global Animations CSS
+   ═══════════════════════════════════════════ */
+
+/* ── Keyframes ── */
+
+@keyframes global-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes global-fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes global-fade-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes global-fade-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes global-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes global-spring-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes global-pulse-warning {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+    filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.7));
+  }
+}
+
+/* ── Entrance Animation Classes ── */
+
+.anim-fade-up {
+  opacity: 0;
+  animation: global-fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.anim-fade-down {
+  opacity: 0;
+  animation: global-fade-in-down 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.anim-fade-in-left {
+  opacity: 0;
+  animation: global-fade-in-left 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.anim-fade-in-right {
+  opacity: 0;
+  animation: global-fade-in-right 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.anim-scale-in {
+  opacity: 0;
+  animation: global-scale-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.anim-spring-up {
+  opacity: 0;
+  animation: global-spring-up 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ── Staggered Delay Utilities ── */
+
+.delay-1 { animation-delay: 0.05s !important; }
+.delay-2 { animation-delay: 0.1s !important; }
+.delay-3 { animation-delay: 0.15s !important; }
+.delay-4 { animation-delay: 0.2s !important; }
+.delay-5 { animation-delay: 0.25s !important; }
+.delay-6 { animation-delay: 0.3s !important; }
+.delay-7 { animation-delay: 0.35s !important; }
+.delay-8 { animation-delay: 0.4s !important; }
+.delay-9 { animation-delay: 0.45s !important; }
+.delay-10 { animation-delay: 0.5s !important; }
+
+/* ── Hover Transitions ── */
+
+.hover-premium-lift {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.hover-premium-lift:hover {
+  transform: translateY(-6px) scale(1.01) !important;
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.hover-glow-orange {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.hover-glow-orange:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 20px 35px rgba(234, 88, 12, 0.2), 0 4px 6px rgba(234, 88, 12, 0.05) !important;
+  border-color: rgba(234, 88, 12, 0.3) !important;
+}
+
+.hover-glow-blue {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.hover-glow-blue:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 20px 35px rgba(59, 130, 246, 0.25), 0 4px 6px rgba(59, 130, 246, 0.05) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+.hover-glow-green {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.hover-glow-green:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 20px 35px rgba(16, 185, 129, 0.25), 0 4px 6px rgba(16, 185, 129, 0.05) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+.hover-glow-purple {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.hover-glow-purple:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 20px 35px rgba(139, 92, 246, 0.25), 0 4px 6px rgba(139, 92, 246, 0.05) !important;
+  border-color: rgba(139, 92, 246, 0.4) !important;
+}
+
+/* ── Smooth Navigation Disable ── */
+.nav-disabled {
+  pointer-events: none;
+  opacity: 0.6;
+  filter: grayscale(1);
+  transition: all 0.5s ease;
+}

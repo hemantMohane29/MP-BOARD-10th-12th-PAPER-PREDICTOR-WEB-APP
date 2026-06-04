@@ -1,0 +1,478 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | MP Board Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/global_animations.css' %}">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ─── THEME TOKENS ─── */
+:root[data-theme="dark"] {
+  --bg-body:        linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  --bg-grid:        rgba(255,255,255,0.03);
+  --panel-bg:       rgba(15,12,41,0.60);
+  --panel-border:   rgba(255,255,255,0.08);
+  --text-primary:   #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted:     #64748b;
+  --input-bg:       rgba(255,255,255,0.06);
+  --input-border:   rgba(255,255,255,0.10);
+  --input-focus-bg: rgba(99,102,241,0.08);
+  --input-focus-bd: #6366f1;
+  --input-shadow:   rgba(99,102,241,0.15);
+  --label-float-bg: #1e1b4b;
+  --chip-bg:        rgba(255,255,255,0.06);
+  --chip-border:    rgba(255,255,255,0.10);
+  --chip-text:      #e2e8f0;
+  --chip-sub:       #94a3b8;
+  --quote-bg:       rgba(245,158,11,0.07);
+  --divider-line:   rgba(255,255,255,0.10);
+  --stat-label:     #64748b;
+  --error-color:    #fca5a5;
+}
+
+:root {
+  --bg-body:        linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 50%, #faf5ff 100%);
+  --bg-grid:        rgba(99,102,241,0.04);
+  --panel-bg:       rgba(255,255,255,0.75);
+  --panel-border:   rgba(99,102,241,0.12);
+  --card-bg:        transparent;
+  --text-primary:   #1e1b4b;
+  --text-secondary: #475569;
+  --text-muted:     #64748b;
+  --input-bg:       rgba(255,255,255,0.90);
+  --input-border:   rgba(99,102,241,0.25);
+  --input-focus-bg: rgba(99,102,241,0.05);
+  --input-focus-bd: #6366f1;
+  --input-shadow:   rgba(99,102,241,0.15);
+  --label-float-bg: #e8eafe;
+  --chip-bg:        rgba(99,102,241,0.07);
+  --chip-border:    rgba(99,102,241,0.15);
+  --chip-text:      #312e81;
+  --chip-sub:       #6366f1;
+  --quote-bg:       rgba(245,158,11,0.10);
+  --divider-line:   rgba(99,102,241,0.15);
+  --stat-label:     #6366f1;
+  --error-color:    #dc2626;
+}
+
+/* ─── BASE ─── */
+body {
+  min-height: 100vh;
+  display: flex;
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden;
+  background: var(--bg-body);
+  position: relative;
+  transition: background 0.4s;
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(99,102,241,0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(245,158,11,0.10) 0%, transparent 50%);
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+
+body::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+}
+
+/* No toggle on auth pages — theme applied silently from localStorage */
+
+
+
+/* ─── LAYOUT ─── */
+.page-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  z-index: 2;
+}
+
+/* ─── LEFT PANEL ─── */
+.brand-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 60px 56px;
+  color: var(--text-primary);
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 56px;
+}
+
+.logo-badge {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 8px 24px rgba(245,158,11,0.35);
+}
+
+.logo-text {
+  font-size: 22px;
+  font-weight: 800;
+  background: linear-gradient(90deg, #fbbf24, #f8fafc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .logo-text {
+  background: linear-gradient(90deg, #d97706, #4f46e5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-headline {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.brand-headline span {
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-sub {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 48px;
+  font-family: 'Noto Sans Devanagari', sans-serif;
+  line-height: 1.7;
+  max-width: 360px;
+}
+
+.features-list { display: flex; flex-direction: column; gap: 14px; }
+
+.feature-chip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-border);
+  border-radius: 14px;
+  padding: 14px 20px;
+  max-width: 360px;
+  transition: background 0.3s;
+}
+
+.feature-chip:hover { filter: brightness(1.08); }
+.chip-icon { font-size: 22px; flex-shrink: 0; }
+.chip-text { font-size: 14px; font-weight: 600; color: var(--chip-text); }
+.chip-text span { display: block; font-size: 12px; font-weight: 400; color: var(--chip-sub); margin-top: 2px; font-family: 'Noto Sans Devanagari', sans-serif; }
+
+.quote-block {
+  margin-top: 44px;
+  padding: 18px 22px;
+  border-left: 3px solid #f59e0b;
+  background: var(--quote-bg);
+  border-radius: 0 12px 12px 0;
+  max-width: 360px;
+}
+
+.quote-block p { font-size: 14px; font-style: italic; color: var(--text-secondary); line-height: 1.7; }
+.quote-block cite { display: block; margin-top: 8px; font-size: 12px; font-weight: 600; color: #f59e0b; }
+
+/* ─── RIGHT PANEL ─── */
+.auth-panel {
+  width: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 48px;
+  background: var(--panel-bg);
+  border-left: 1px solid var(--panel-border);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transition: background 0.4s, border-color 0.4s;
+}
+
+.auth-card { width: 100%; }
+.welcome-sub  { font-size: 14px; color: var(--text-secondary); margin-bottom: 32px; font-family: 'Noto Sans Devanagari', sans-serif; }
+
+/* ─── INPUT ─── */
+.input-group { position: relative; margin-bottom: 20px; }
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 15px 18px;
+  border-radius: 14px;
+  border: 1.5px solid var(--input-border);
+  outline: none;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-family: 'Poppins', sans-serif;
+  transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+
+.input-group input::placeholder { color: var(--text-muted); font-size: 14px; }
+
+.input-group input:focus {
+  border-color: var(--input-focus-bd);
+  background: var(--input-focus-bg);
+  box-shadow: 0 0 0 4px var(--input-shadow);
+}
+
+/* ─── ERRORS ─── */
+.error-msg {
+  background: rgba(239,68,68,0.10);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--error-color);
+  font-weight: 500;
+}
+
+.errorlist {
+  color: var(--error-color);
+  font-size: 12px;
+  list-style: none;
+  margin: -12px 0 12px 8px;
+}
+
+/* ─── BUTTON ─── */
+.btn-submit {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+  margin-top: 8px;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 8px 24px rgba(99,102,241,0.35);
+}
+
+.btn-submit::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.5s;
+}
+
+.btn-submit:hover::before { left: 100%; }
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(99,102,241,0.45); }
+.btn-submit:active { transform: translateY(0); }
+
+/* ─── DIVIDER ─── */
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 24px 0; color: var(--text-muted); font-size: 13px;
+}
+.divider::before, .divider::after {
+  content: ""; flex: 1; height: 1px; background: var(--divider-line);
+}
+
+/* ─── FOOTER ─── */
+.auth-footer { text-align: center; margin-top: 24px; font-size: 14px; color: var(--text-muted); }
+.auth-footer a { color: #818cf8; text-decoration: none; font-weight: 600; transition: color 0.2s; }
+.auth-footer a:hover { color: #a5b4fc; }
+
+/* ─── STATS ─── */
+.stats-row {
+  display: flex; gap: 16px; margin-top: 32px;
+  padding-top: 24px; border-top: 1px solid var(--divider-line);
+}
+.stat-item { flex: 1; text-align: center; }
+.stat-num {
+  font-size: 20px; font-weight: 800;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.stat-label { font-size: 11px; color: var(--stat-label); margin-top: 2px; font-weight: 600; letter-spacing: 0.04em; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .brand-panel { display: none; }
+  .auth-panel { width: 100%; border: none; padding: 32px 24px; }
+}
+</style>
+</head>
+
+<body>
+
+
+
+<div class="page-layout">
+
+  <!-- LEFT: Motivation Panel -->
+  <div class="brand-panel">
+    <div class="brand-logo">
+      <img src="{% static 'images/logo.jpeg' %}" alt="MP Board" style="width:52px;height:52px;border-radius:14px;object-fit:cover;box-shadow:0 8px 24px rgba(0,0,0,0.3);">
+      <span class="logo-text">MP Board Analyzer</span>
+    </div>
+
+    <h2 class="brand-headline anim-fade-up">
+      Score Higher in<br>Your <span>Board Exams</span>
+    </h2>
+    <p class="brand-sub anim-fade-up delay-1">
+      पिछले वर्षों के प्रश्न पत्रों का विश्लेषण करें और अगली परीक्षा के लिए स्मार्ट तरीके से तैयारी करें।
+    </p>
+
+    <div class="features-list">
+      <div class="feature-chip anim-fade-up delay-2 hover-premium-lift">
+        <div class="chip-icon">📊</div>
+        <div class="chip-text">Smart Pattern Analysis<span>पैटर्न विश्लेषण से पता लगाएं कौन से प्रश्न बार-बार आते हैं</span></div>
+      </div>
+      <div class="feature-chip anim-fade-up delay-3 hover-premium-lift">
+        <div class="chip-icon">🎯</div>
+        <div class="chip-text">Predicted Questions<span>अगली परीक्षा में आने वाले संभावित प्रश्नों की सूची पाएं</span></div>
+      </div>
+      <div class="feature-chip anim-fade-up delay-4 hover-premium-lift">
+        <div class="chip-icon">📖</div>
+        <div class="chip-text">Chapter-wise Strategy<span>जानें किस अध्याय को पहले पढ़ना है — समय बचाएं, अंक बढ़ाएं</span></div>
+      </div>
+    </div>
+
+    <div class="quote-block anim-fade-up delay-5">
+      <p>"पढ़ोगे-लिखोगे बनोगे नवाब, खेलोगे-कूदोगे होगे खराब।"</p>
+      <cite>— भारतीय कहावत</cite>
+    </div>
+  </div>
+
+  <!-- RIGHT: Login Card -->
+  <div class="auth-panel">
+    <div class="auth-card anim-spring-up">
+
+      <h2>Welcome Back!</h2>
+      <p class="welcome-sub">अपने ईमेल से लॉगिन करें और पढ़ाई शुरू करें।</p>
+
+      <!-- Show non-field errors -->
+      {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+          <div class="error-msg">⚠️ {{ error }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="POST">
+        {% csrf_token %}
+
+        <!-- EMAIL -->
+        <div class="input-group">
+          <input type="email" name="email" id="email" required
+                 placeholder="Email Address — yourname@gmail.com"
+                 value="{{ form.email.value|default:'' }}">
+        </div>
+        {% if form.email.errors %}
+          <ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+
+        <!-- PASSWORD -->
+        <div class="input-group" style="position:relative;">
+          <input type="password" name="password" id="password" required
+                 placeholder="Password / पासवर्ड" style="padding-right:48px;">
+          <button type="button" id="toggle-password" onclick="togglePassword('password','toggle-password')"
+                  style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--text-muted);font-size:18px;line-height:1;z-index:3;"
+                  aria-label="Show/hide password">
+            👁️
+          </button>
+        </div>
+        {% if form.password.errors %}
+          <ul class="errorlist">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+
+        <button type="submit" class="btn-submit">
+          Login &amp; Start Studying →
+        </button>
+      </form>
+
+      <div class="divider">or</div>
+
+      <div class="auth-footer">
+        New student? / नया विद्यार्थी?&nbsp;
+        <a href="/signup/">Create Account / अकाउंट बनाएं</a>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-num">10th &amp; 12th</div>
+          <div class="stat-label">CLASSES</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">5+</div>
+          <div class="stat-label">SUBJECTS</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">5 Yrs</div>
+          <div class="stat-label">PAPERS</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+function togglePassword(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn   = document.getElementById(btnId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+    btn.setAttribute('aria-label', 'Hide password');
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+    btn.setAttribute('aria-label', 'Show password');
+  }
+}
+</script>
+
+</body>
+</html>

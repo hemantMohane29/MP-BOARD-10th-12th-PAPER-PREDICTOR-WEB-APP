@@ -1,0 +1,356 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ session.subject }} Analysis Report — MP Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+    background: #fff;
+    color: #0f172a;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* ── Print Button (hidden when printing) ── */
+  .print-bar {
+    background: #1e3a8a;
+    color: white;
+    padding: 12px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 999;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .print-bar span { font-size: 15px; font-weight: 700; }
+  .btn-print {
+    background: #f59e0b; color: #1c1917;
+    border: none; padding: 10px 24px;
+    border-radius: 8px; font-size: 14px; font-weight: 800;
+    cursor: pointer; transition: 0.2s;
+  }
+  .btn-print:hover { background: #d97706; }
+  .btn-back {
+    background: rgba(255,255,255,0.15); color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 10px 20px; border-radius: 8px;
+    font-size: 13px; font-weight: 700;
+    text-decoration: none; transition: 0.2s;
+  }
+  .btn-back:hover { background: rgba(255,255,255,0.25); }
+
+  /* ── Main Content ── */
+  .page {
+    max-width: 900px;
+    margin: 72px auto 40px;
+    padding: 40px;
+  }
+
+  /* ── Header ── */
+  .report-header {
+    border-bottom: 3px solid #1e3a8a;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+  .report-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1e3a8a;
+    margin-bottom: 4px;
+  }
+  .report-meta {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  /* ── Stats Table ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-box {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-number { font-size: 32px; font-weight: 800; line-height: 1; }
+  .stat-label  { font-size: 11px; font-weight: 700; color: #64748b; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── Section Headings ── */
+  .section-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #1e3a8a;
+    margin: 28px 0 6px;
+    padding-bottom: 6px;
+  }
+  .divider { height: 2px; border: none; margin-bottom: 14px; }
+
+  /* ── Question Cards ── */
+  .q-item {
+    border-left: 4px solid #e2e8f0;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    background: #fafaf9;
+    border-radius: 0 8px 8px 0;
+    page-break-inside: avoid;
+  }
+  .q-text {
+    font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.75;
+    margin-bottom: 6px;
+  }
+  .q-meta {
+    font-size: 11px;
+    color: #64748b;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .q-meta span { display: inline-flex; align-items: center; gap: 3px; }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    margin-right: 4px;
+  }
+
+  /* ── Chapter Table ── */
+  .ch-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 12px;
+  }
+  .ch-table th {
+    background: #1e3a8a;
+    color: white;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 700;
+  }
+  .ch-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+    line-height: 1.6;
+  }
+  .ch-table tr:nth-child(even) td { background: #f8fafc; }
+
+  /* ── Advice Box ── */
+  .advice-box {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-left: 5px solid #1e3a8a;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 24px;
+    page-break-inside: avoid;
+  }
+  .advice-box h3 { color: #1e3a8a; font-size: 14px; margin-bottom: 8px; }
+  .advice-box p  {
+    font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+    font-size: 13px;
+    color: #1e40af;
+    line-height: 1.8;
+  }
+
+  /* ── Footer ── */
+  .report-footer {
+    margin-top: 40px;
+    padding-top: 12px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 10px;
+    color: #94a3b8;
+    text-align: center;
+  }
+
+  /* ── @media print ── */
+  @media print {
+    .print-bar { display: none !important; }
+    .page { margin: 0; padding: 24px; max-width: 100%; }
+    body { font-size: 12px; }
+    .q-item { page-break-inside: avoid; }
+    .ch-table { page-break-inside: auto; }
+    .advice-box { page-break-inside: avoid; }
+    @page { margin: 1.5cm; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Print Bar (hidden when printing) -->
+<div class="print-bar">
+  <div style="display:flex; align-items:center; gap:16px;">
+    <a href="/results/{{ session.id }}/" class="btn-back">← Back to Results</a>
+    <span>📄 Analysis Report — {{ session.subject }} ({{ session.student_class }})</span>
+  </div>
+  <button class="btn-print" onclick="window.print()">🖨️ Save as PDF / Print</button>
+</div>
+
+<div class="page">
+  <!-- Header -->
+  <div class="report-header">
+    <div class="report-title">MP Board Exam Analysis Report</div>
+    <div class="report-meta">
+      Subject: <strong>{{ session.subject }}</strong> &nbsp;|&nbsp;
+      Class: <strong>{{ session.student_class }}</strong> &nbsp;|&nbsp;
+      Date: <strong>{{ session.created_at|date:"d M Y" }}</strong> &nbsp;|&nbsp;
+      Generated by MP Board AI Analyzer
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-box" style="border-top: 4px solid #f59e0b;">
+      <div class="stat-number" style="color:#b45309;" id="stat-predicted">–</div>
+      <div class="stat-label">Predicted Questions</div>
+    </div>
+    <div class="stat-box" style="border-top: 4px solid #16a34a;">
+      <div class="stat-number" style="color:#15803d;" id="stat-repeated">–</div>
+      <div class="stat-label">Repeated Questions</div>
+    </div>
+    <div class="stat-box" style="border-top: 4px solid #3b82f6;">
+      <div class="stat-number" style="color:#1d4ed8;" id="stat-chapters">–</div>
+      <div class="stat-label">Chapters Covered</div>
+    </div>
+  </div>
+
+  <div id="report-body">Loading...</div>
+
+  <div class="report-footer">
+    MP Board AI Exam Intelligence System &nbsp;·&nbsp; Generated on {{ session.created_at|date:"d M Y, g:i A" }}
+  </div>
+</div>
+
+<script>
+const DATA = {{ result_json|safe }};
+
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function render() {
+  const s2 = DATA.stage_2_insights || {};
+  const s3 = DATA.stage_3_predictive_dashboard || {};
+  const predicted = s2.predicted_important_questions || [];
+  predicted.sort((a, b) => (b.star_rating || 3) - (a.star_rating || 3));
+  const repeated  = s2.repeated_questions || [];
+  const strategy  = s3.chapter_wise_strategy || [];
+  const advice    = s3.final_student_advice || '';
+  const pattern   = s3.pattern_analysis || {};
+
+  document.getElementById('stat-predicted').textContent = predicted.length;
+  document.getElementById('stat-repeated').textContent  = repeated.length;
+  document.getElementById('stat-chapters').textContent  = strategy.length;
+
+  let html = '';
+
+  /* ── Predicted Questions ── */
+  html += `<h2 class="section-title">🎯 Predicted Important Questions</h2>
+           <hr class="divider" style="background:#f59e0b;">`;
+  predicted.forEach((q, i) => {
+    const starsCount = q.star_rating || 3;
+    const starsStr = '⭐'.repeat(starsCount);
+    html += `<div class="q-item" style="border-left-color:#f59e0b;">
+      <div class="q-text">${i+1}. ${esc(q.question)}</div>
+      <div class="q-meta">
+        ${starsStr       ? `<span>${starsStr}</span>` : ''}
+        ${q.marks        ? `<span>🏆 ${esc(q.marks)}</span>` : ''}
+        ${q.question_type? `<span>📝 ${esc(q.question_type)}</span>` : ''}
+        ${q.topic        ? `<span>📘 ${esc(q.topic)}</span>` : ''}
+        ${q.reason       ? `<span>💡 ${esc(q.reason)}</span>` : ''}
+      </div>
+    </div>`;
+  });
+
+  /* ── Repeated Questions ── */
+  html += `<h2 class="section-title" style="margin-top:32px;">🔄 Repeated Questions</h2>
+           <hr class="divider" style="background:#16a34a;">`;
+  repeated.forEach((q, i) => {
+    const years_str = Array.isArray(q.years) ? q.years.join(', ') : (q.year || '');
+    html += `<div class="q-item" style="border-left-color:#16a34a;">
+      <div class="q-text">${i+1}. ${esc(q.question)}</div>
+      <div class="q-meta">
+        ${q.marks     ? `<span>🏆 ${esc(q.marks)}</span>` : ''}
+        ${q.question_type ? `<span>📝 ${esc(q.question_type)}</span>` : ''}
+        ${q.topic     ? `<span>📘 ${esc(q.topic)}</span>` : ''}
+        ${q.frequency ? `<span>🔁 Repeated ${esc(String(q.frequency))}×</span>` : ''}
+        ${years_str   ? `<span>📅 ${esc(years_str)}</span>` : ''}
+      </div>
+    </div>`;
+  });
+
+  /* ── Chapter Strategy ── */
+  if (strategy.length) {
+    html += `<h2 class="section-title" style="margin-top:32px;">📚 Chapter-wise Study Strategy</h2>
+             <hr class="divider" style="background:#3b82f6;">
+             <table class="ch-table">
+               <thead><tr><th>Chapter</th><th>Priority</th><th>Study Tip</th></tr></thead>
+               <tbody>`;
+    strategy.forEach(ch => {
+      const prio = ch.priority_level || 'Medium';
+      const color = prio.toLowerCase() === 'high' ? '#ef4444' : '#f59e0b';
+      html += `<tr>
+        <td>${esc(ch.chapter_name || ch.chapter || '')}</td>
+        <td><span style="background:${color}20; color:${color}; font-weight:700; padding:2px 8px; border-radius:6px; font-size:11px;">${esc(prio)}</span></td>
+        <td>${esc(ch.study_tip || '')}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  }
+
+  /* ── Pattern Analysis ── */
+  if (pattern.cyclical_trends || pattern.emerging_topics) {
+    html += `<h2 class="section-title" style="margin-top:32px;">📊 Exam Pattern Analysis</h2>
+             <hr class="divider" style="background:#6366f1;">`;
+    if (pattern.cyclical_trends) {
+      html += `<div class="q-item" style="border-left-color:#6366f1;">
+        <div class="q-text" style="font-size:12px; font-weight:700; color:#4338ca; margin-bottom:4px;">🔁 Cyclical Trends</div>
+        <div style="font-family:'Noto Sans Devanagari','Inter',sans-serif; font-size:13px; line-height:1.7;">${esc(pattern.cyclical_trends)}</div>
+      </div>`;
+    }
+    if (pattern.emerging_topics) {
+      html += `<div class="q-item" style="border-left-color:#10b981;">
+        <div class="q-text" style="font-size:12px; font-weight:700; color:#047857; margin-bottom:4px;">🌟 Emerging Topics</div>
+        <div style="font-family:'Noto Sans Devanagari','Inter',sans-serif; font-size:13px; line-height:1.7;">${esc(pattern.emerging_topics)}</div>
+      </div>`;
+    }
+  }
+
+  /* ── Final Advice ── */
+  if (advice) {
+    html += `<div class="advice-box">
+      <h3>🤖 AI Study Advice / परीक्षा सलाह</h3>
+      <p>${esc(advice)}</p>
+    </div>`;
+  }
+
+  document.getElementById('report-body').innerHTML = html;
+}
+
+render();
+</script>
+</body>
+</html>

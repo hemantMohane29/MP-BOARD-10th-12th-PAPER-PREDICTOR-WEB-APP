@@ -1,0 +1,9 @@
+django>=4.2,<5.0
+djangorestframework
+google-genai
+python-dotenv
+requests
+sarvamai
+reportlab
+PyPDF2
+Pillow
