@@ -1,19 +1,25 @@
 """URL configuration for config project."""
+import os
+import json
+import mimetypes
+
 from django import forms as django_forms
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.http import JsonResponse, FileResponse, Http404, HttpResponse, HttpResponseBadRequest
 
 from analyzer.forms import SimpleSignupForm
 from analyzer.models import AnalysisSession, LibraryPaper
+from analyzer.views import admin_bulk_upload_view, delete_paper_view, delete_papers_bulk_view
 
 
 class EmailLoginForm(django_forms.Form):
@@ -115,7 +121,6 @@ def history_view(request):
 def session_result_view(request, session_id):
     """View saved results of a completed analysis session."""
     from analyzer.models import AnalysisResult
-    import json
     session = get_object_or_404(AnalysisSession, id=session_id, user=request.user)
     result = None
     if session.status == 'completed':
@@ -133,7 +138,6 @@ def session_result_view(request, session_id):
 def print_result_view(request, session_id):
     """Renders a print-optimised page for the analysis result (browser prints to PDF)."""
     from analyzer.models import AnalysisResult
-    import json
     session = get_object_or_404(AnalysisSession, id=session_id, user=request.user)
     result = None
     if session.status == 'completed':
@@ -150,8 +154,6 @@ def print_result_view(request, session_id):
 @login_required(login_url='/login/')
 def download_paper_view(request, paper_id):
     """Serves a LibraryPaper file as a direct download."""
-    import mimetypes
-    from django.http import FileResponse, Http404
     paper = get_object_or_404(LibraryPaper, id=paper_id)
     file_path = paper.pdf_file.path
     if not os.path.exists(file_path):
@@ -168,7 +170,6 @@ def download_paper_view(request, paper_id):
 def download_result_pdf_view(request, session_id):
     """Generates and serves the analysis result as a downloadable PDF."""
     import io
-    from django.http import HttpResponse
     from analyzer.models import AnalysisResult
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
@@ -179,6 +180,7 @@ def download_result_pdf_view(request, session_id):
     from reportlab.pdfbase.ttfonts import TTFont
 
     # ── Register a Hindi-capable font (Devanagari support) ──
+    # On Linux (Render), Windows font paths won't exist — falls back to Helvetica which is fine
     HINDI_FONT = 'Helvetica'
     HINDI_FONT_BOLD = 'Helvetica-Bold'
     _font_candidates = [
@@ -186,6 +188,9 @@ def download_result_pdf_view(request, session_id):
         (r'C:\Windows\Fonts\NirmalaS.ttf',   r'C:\Windows\Fonts\NirmalaSBold.ttf',   'NirmalaS'),
         (r'C:\Windows\Fonts\mangal.ttf',     r'C:\Windows\Fonts\mangalb.ttf',        'Mangal'),
         (r'C:\Windows\Fonts\arial.ttf',      r'C:\Windows\Fonts\arialbd.ttf',        'Arial'),
+        ('/usr/share/fonts/truetype/lohit-devanagari/Lohit-Devanagari.ttf', '', 'Lohit'),
+        ('/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf',
+         '/usr/share/fonts/truetype/noto/NotoSansDevanagari-Bold.ttf', 'NotoDevanagari'),
     ]
     for reg_path, bold_path, fname in _font_candidates:
         if os.path.exists(reg_path):
@@ -200,12 +205,10 @@ def download_result_pdf_view(request, session_id):
 
     session = get_object_or_404(AnalysisSession, id=session_id, user=request.user)
     if session.status != 'completed':
-        from django.http import HttpResponseBadRequest
         return HttpResponseBadRequest("Analysis not completed yet.")
 
     result = AnalysisResult.objects.filter(session=session).first()
     if not result:
-        from django.http import HttpResponseBadRequest
         return HttpResponseBadRequest("No result found for this session.")
 
     s2 = result.stage_2_deduplicated_json or {}
@@ -356,10 +359,6 @@ def download_result_pdf_view(request, session_id):
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
 
-
-from analyzer.views import admin_bulk_upload_view, delete_paper_view, delete_papers_bulk_view
-from django.shortcuts import get_object_or_404
-import os
 
 urlpatterns = [
     path('',          index_view,     name='index'),
