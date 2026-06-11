@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 set -o errexit
 
-echo "=== Python version: $(python --version) ==="
-echo "=== Pip version: $(pip --version) ==="
+# Upgrade pip FIRST using python -m (bypasses old pip limitations)
+python -m pip install --upgrade pip
 
-# Upgrade pip first to ensure it can resolve modern packages
-pip install --upgrade pip
+echo "=== Python: $(python --version) | Pip: $(pip --version) ==="
 
 pip install -r requirements.txt
 
