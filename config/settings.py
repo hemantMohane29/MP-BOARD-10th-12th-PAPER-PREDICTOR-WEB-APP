@@ -75,6 +75,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+# Use file-based sessions so login works even if DB tables aren't ready
+SESSION_ENGINE = 'django.contrib.sessions.backends.file'
+SESSION_FILE_PATH = '/tmp/django_sessions'
+
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
