@@ -15,9 +15,6 @@ db.sqlite3
 *.log
 error_log.txt
 /media/
-/staticfiles/
-/static_collected/
-
 # Environment variables
 .env
 .env.local
