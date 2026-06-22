@@ -14,7 +14,6 @@ venv.bak/
 db.sqlite3
 *.log
 error_log.txt
-/media/
 # Environment variables
 .env
 .env.local
@@ -32,9 +31,9 @@ error_log.txt
 *.db
 *.sqlite3
 
-# Media files
-/media/uploads/
-/media/processed/
+# Media files — committed to git for Render deployment
+# /media/uploads/
+# /media/processed/
 
 # Python package management
 pip-log.txt
