@@ -12,6 +12,7 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 :root {
   --blue-deep: #1e3a8a; --blue-mid: #3b82f6;
+  --red: #dc2626;
   --bg: #fafaf9; --white: #ffffff; --ink: #0f172a; --muted: #64748b;
   --border: #e2e8f0; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
   --font-head: 'Manrope', sans-serif; --font-body: 'Inter', sans-serif; --font-hi: 'Noto Sans Devanagari', sans-serif;
@@ -22,7 +23,6 @@ body { font-family: var(--font-body); background: var(--bg); margin: 0; padding:
 .main-nav { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 .nav-container { max-width: 1400px; margin: 0 auto; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
 .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none;}
-.brand-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white;}
 .brand-name { font-size: 20px; font-weight: 800; color: var(--blue-deep); font-family: var(--font-head); }
 .nav-menu { display: flex; gap: 8px; }
 .nav-link { padding: 10px 20px; border-radius: 8px; color: var(--muted); font-weight: 600; text-decoration: none; transition: all 0.2s; font-size: 14px;}
@@ -31,6 +31,24 @@ body { font-family: var(--font-body); background: var(--bg); margin: 0; padding:
 .nav-actions { display: flex; align-items: center; gap: 16px; }
 .username { font-size: 14px; font-weight: 600; color: var(--ink); }
 
+/* Hamburger */
+.nav-hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; border-radius: 6px; transition: background 0.2s; }
+.nav-hamburger:hover { background: #f1f5f9; }
+.nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 2px; transition: all 0.3s; }
+.nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Mobile Nav Drawer */
+.mobile-nav-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 200; backdrop-filter: blur(4px); }
+.mobile-nav-overlay.show { display: block; }
+.mobile-nav-drawer { position: fixed; top: 0; right: 0; width: 280px; height: 100vh; background: var(--white); z-index: 201; box-shadow: -8px 0 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; padding: 24px 20px; gap: 8px; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); }
+.mobile-nav-drawer.show { transform: translateX(0); }
+.mobile-nav-drawer .nav-link { font-size: 15px; padding: 14px 18px; border-radius: 10px; }
+.mobile-nav-drawer .drawer-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid var(--border); font-size: 14px; }
+.mobile-nav-drawer .drawer-username { font-weight: 600; color: var(--ink); }
+.mobile-nav-drawer .drawer-logout { color: var(--red); font-weight: 600; text-decoration: none; }
+
 /* Main Content */
 main { max-width: 1000px; margin: 32px auto; padding: 0 32px; }
 .page-header { margin-bottom: 32px; border-bottom: 2px solid var(--border); padding-bottom: 16px;}
@@ -38,20 +56,39 @@ main { max-width: 1000px; margin: 32px auto; padding: 0 32px; }
 .page-header p { color: var(--muted); font-family: var(--font-hi); font-size: 16px;}
 
 .history-list { display: flex; flex-direction: column; gap: 16px; }
-.session-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;}
-.session-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); border-color: var(--blue-light); }
+.session-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; gap: 16px;}
+.session-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
 .session-info h3 { font-family: var(--font-head); font-size: 18px; font-weight: 700; margin-bottom: 4px;}
-.session-meta { display: flex; gap: 16px; font-size: 13px; color: var(--muted); }
-.status-badge { padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; }
+.session-meta { display: flex; gap: 16px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.session-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: wrap; }
+.status-badge { padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; white-space: nowrap; }
 .status-completed { background: #dcfce7; color: #166534; }
 .status-failed { background: #fee2e2; color: #991b1b; }
 .status-pending { background: #fef3c7; color: #92400e; }
 
 /* Responsive */
 @media(max-width: 768px) {
-  .nav-container { flex-direction: column; gap: 12px; padding: 16px; }
-  main { padding: 0 16px; }
-  .session-card { flex-direction: column; align-items: flex-start; gap: 12px;}
+  .nav-menu, .username { display: none; }
+  .nav-hamburger { display: flex; }
+  .nav-container { padding: 14px 20px; }
+  .btn-logout, a[href="/logout/"] {
+    padding: 7px 14px !important;
+    background: #fee2e2 !important;
+    border: 1px solid #fecaca !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    color: #dc2626 !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+  }
+  main { padding: 0 16px; margin: 24px auto; }
+  .page-header h1 { font-size: 26px; }
+  .session-card { flex-direction: column; align-items: flex-start; }
+  .session-actions { width: 100%; }
+}
+@media(max-width: 480px) {
+  .session-info h3 { font-size: 16px; }
+  .session-meta { flex-direction: column; gap: 4px; }
 }
 </style>
 </head>
@@ -75,8 +112,26 @@ main { max-width: 1000px; margin: 32px auto; padding: 0 32px; }
       <span class="username">👤 {{ user.username }}</span>
       <a href="/logout/" style="font-size: 14px; color: #dc2626; font-weight: 600; text-decoration: none;">Logout</a>
     </div>
+    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+
+<!-- Mobile Nav -->
+<div class="mobile-nav-overlay" id="mobile-overlay" onclick="closeMobileNav()"></div>
+<div class="mobile-nav-drawer" id="mobile-drawer">
+  <a href="/dashboard/" class="nav-link">📊 Dashboard</a>
+  <a href="/history/" class="nav-link active">📋 History</a>
+  <a href="/papers/" class="nav-link">📚 Library</a>
+  {% if user.is_superuser %}
+  <a href="/admin/" class="nav-link" style="color: #ea580c;">🔧 Admin</a>
+  {% endif %}
+  <div class="drawer-footer">
+    <span class="drawer-username">👤 {{ user.username }}</span>
+    <a href="/logout/" class="drawer-logout">Logout</a>
+  </div>
+</div>
 
 <main>
   <div class="page-header anim-fade-up">
@@ -94,16 +149,16 @@ main { max-width: 1000px; margin: 32px auto; padding: 0 32px; }
           <span>🎓 Class: {{ session.student_class }}</span>
         </div>
       </div>
-      <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
+      <div class="session-actions">
         {% if session.status == 'completed' %}
           <span class="status-badge status-completed">✅ Completed</span>
-          <a href="/results/{{ session.id }}/" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; display:inline-flex; align-items:center; gap:6px; transition: 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <a href="/results/{{ session.id }}/" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; display:inline-flex; align-items:center; gap:6px; transition: 0.2s; white-space: nowrap;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
             👁️ View Results
           </a>
         {% elif session.status == 'failed' %}
           <span class="status-badge status-failed">❌ Failed</span>
           {% if session.error_message %}
-          <span style="font-size: 12px; color:#991b1b; background:#fee2e2; padding:4px 10px; border-radius:6px; max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ session.error_message }}">{{ session.error_message|truncatechars:50 }}</span>
+          <span style="font-size: 12px; color:#991b1b; background:#fee2e2; padding:4px 10px; border-radius:6px; max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ session.error_message }}">{{ session.error_message|truncatechars:50 }}</span>
           {% endif %}
         {% else %}
           <span class="status-badge status-pending">⏳ Processing</span>
@@ -118,6 +173,24 @@ main { max-width: 1000px; margin: 32px auto; padding: 0 32px; }
     {% endfor %}
   </div>
 </main>
+
+<script>
+function toggleMobileNav() {
+  const btn = document.getElementById('nav-hamburger');
+  const overlay = document.getElementById('mobile-overlay');
+  const drawer = document.getElementById('mobile-drawer');
+  btn.classList.toggle('open');
+  overlay.classList.toggle('show');
+  drawer.classList.toggle('show');
+  document.body.style.overflow = drawer.classList.contains('show') ? 'hidden' : '';
+}
+function closeMobileNav() {
+  document.getElementById('nav-hamburger').classList.remove('open');
+  document.getElementById('mobile-overlay').classList.remove('show');
+  document.getElementById('mobile-drawer').classList.remove('show');
+  document.body.style.overflow = '';
+}
+</script>
 
 </body>
 </html>

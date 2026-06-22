@@ -41,6 +41,37 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--ink); 
 .nav-actions { display: flex; align-items: center; gap: 16px; }
 .username { font-size: 14px; font-weight: 600; color: var(--ink); }
 .btn-logout { font-size: 14px; color: var(--red); font-weight: 600; text-decoration: none; }
+/* Mobile-only logout button — always visible next to hamburger */
+.btn-logout-mobile {
+  display: none;
+  padding: 7px 12px;
+  background: #fee2e2;
+  color: var(--red);
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Hamburger Button */
+.nav-hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; border-radius: 6px; transition: background 0.2s; }
+.nav-hamburger:hover { background: #f1f5f9; }
+.nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 2px; transition: all 0.3s; }
+.nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Mobile Nav Overlay */
+.mobile-nav-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 200; backdrop-filter: blur(4px); }
+.mobile-nav-overlay.show { display: block; }
+.mobile-nav-drawer { position: fixed; top: 0; right: 0; width: 280px; height: 100vh; background: var(--white); z-index: 201; box-shadow: -8px 0 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; padding: 24px 20px; gap: 8px; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); }
+.mobile-nav-drawer.show { transform: translateX(0); }
+.mobile-nav-drawer .nav-link { font-size: 15px; padding: 14px 18px; border-radius: 10px; }
+.mobile-nav-drawer .drawer-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid var(--border); font-size: 14px; }
+.mobile-nav-drawer .drawer-username { font-weight: 600; color: var(--ink); }
+.mobile-nav-drawer .drawer-logout { color: var(--red); font-weight: 600; text-decoration: none; }
 
 /* Main Content */
 main { max-width: 1400px; margin: 32px auto; padding: 0 32px; }
@@ -864,38 +895,72 @@ main { max-width: 1400px; margin: 32px auto; padding: 0 32px; }
   .illustration-area {
     height: 250px;
   }
+  /* New simple loader: stack on tablet */
+  .loading-container-simple {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 24px;
+    min-height: unset;
+  }
+  .progress-sidebar-simple {
+    position: static;
+  }
 }
 
 @media(max-width: 768px) {
-  .nav-container { flex-direction: column; gap: 12px; padding: 16px; }
+  /* Hide nav links and username — keep logout visible */
+  .nav-menu, .username { display: none; }
+  .nav-hamburger { display: flex; }
+  .nav-container { padding: 14px 20px; }
+  .btn-logout {
+    padding: 7px 14px;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
   main { padding: 0 16px; }
   .filter-label { width: auto; }
+  .filter-group { flex-direction: column; align-items: flex-start; gap: 10px; }
 
+  /* Selection summary stacks */
+  .selection-summary { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .btn-primary { width: 100%; justify-content: center; }
+
+  /* Loading header stacks */
+  .loading-header-simple {
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px 20px;
+  }
+  .header-title { font-size: 26px; }
+  .btn-stop-simple { width: 100%; text-align: center; }
+
+  /* Tips section simplification */
+  .tips-section-simple { padding: 16px; }
+  .animation-area-simple { min-height: 220px; padding: 20px; }
+
+  /* Old loading classes */
   .loading-header {
     flex-direction: column;
     text-align: center;
     padding: 24px 20px;
   }
-  .loading-title {
-    font-size: 24px;
-  }
-  .title-subtext {
-    font-size: 15px;
-  }
-  .btn-stop-analysis {
-    margin-top: 12px;
-    width: 100%;
-    justify-content: center;
-  }
-  .loading-main, .progress-sidebar {
-    padding: 24px 20px;
-  }
-  .steps-timeline {
-    gap: 16px;
-  }
-  .helpful-tips {
-    padding: 16px;
-  }
+  .loading-title { font-size: 24px; }
+  .title-subtext { font-size: 15px; }
+  .btn-stop-analysis { margin-top: 12px; width: 100%; justify-content: center; }
+  .loading-main, .progress-sidebar { padding: 24px 20px; }
+  .steps-timeline { gap: 16px; }
+  .helpful-tips { padding: 16px; }
+}
+
+@media(max-width: 480px) {
+  .papers-grid { grid-template-columns: 1fr; }
+  .selection-header h2 { font-size: 22px; }
+  .filter-bar { padding: 16px; }
+  .quick-stats-grid { grid-template-columns: 1fr 1fr; }
+  .time-estimate-simple { flex-direction: column; align-items: flex-start; gap: 8px; }
 }
 
 /* --- Satisfactory & Smooth Global Animations --- */
@@ -1006,7 +1071,7 @@ main { max-width: 1400px; margin: 32px auto; padding: 0 32px; }
 </head>
 <body>
 
-<nav class="main-nav">
+<nav class="main-nav" id="main-nav">
   <div class="nav-container">
     <a href="/" class="nav-brand">
       <img src="{% static 'images/logo.jpeg' %}" alt="Logo" style="width: 32px; height: 32px; border-radius: 8px; object-fit: cover;">
@@ -1024,8 +1089,27 @@ main { max-width: 1400px; margin: 32px auto; padding: 0 32px; }
       <span class="username">👤 {{ user.username }}</span>
       <a href="/logout/" class="btn-logout">Logout</a>
     </div>
+    <a href="/logout/" class="btn-logout-mobile" aria-label="Logout">⏻ Logout</a>
+    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+
+<!-- Mobile Nav -->
+<div class="mobile-nav-overlay" id="mobile-overlay" onclick="closeMobileNav()"></div>
+<div class="mobile-nav-drawer" id="mobile-drawer">
+  <a href="/dashboard/" class="nav-link active">📊 Dashboard</a>
+  <a href="/history/" class="nav-link">📋 History</a>
+  <a href="/papers/" class="nav-link">📚 Library</a>
+  {% if user.is_superuser %}
+  <a href="/admin/" class="nav-link" style="color: var(--orange);">🔧 Admin</a>
+  {% endif %}
+  <div class="drawer-footer">
+    <span class="drawer-username">👤 {{ user.username }}</span>
+    <a href="/logout/" class="drawer-logout">Logout</a>
+  </div>
+</div>
 
 <main>
   <div id="selection-view">
@@ -2165,6 +2249,25 @@ function switchTab(tabId) {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+</script>
+
+<script>
+// Mobile nav toggle
+function toggleMobileNav() {
+  const btn = document.getElementById('nav-hamburger');
+  const overlay = document.getElementById('mobile-overlay');
+  const drawer = document.getElementById('mobile-drawer');
+  btn.classList.toggle('open');
+  overlay.classList.toggle('show');
+  drawer.classList.toggle('show');
+  document.body.style.overflow = drawer.classList.contains('show') ? 'hidden' : '';
+}
+function closeMobileNav() {
+  document.getElementById('nav-hamburger').classList.remove('open');
+  document.getElementById('mobile-overlay').classList.remove('show');
+  document.getElementById('mobile-drawer').classList.remove('show');
+  document.body.style.overflow = '';
+}
 </script>
 
 </body>

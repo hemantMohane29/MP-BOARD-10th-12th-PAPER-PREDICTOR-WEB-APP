@@ -84,12 +84,15 @@ USE_TZ = True
 # Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# WhiteNoise — serve app static files directly from source as fallback
-WHITENOISE_ROOT = None  # don't serve from a root path
-WHITENOISE_AUTOREFRESH = True  # always serve latest files
+# Use WhiteNoise compressed storage on Render (production), plain storage locally
+if DEBUG:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+STATICFILES_DIRS = [BASE_DIR / 'static']
+WHITENOISE_AUTOREFRESH = DEBUG  # auto-refresh in dev mode only
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

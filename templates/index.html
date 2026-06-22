@@ -523,6 +523,17 @@
     }
 
     /* ── RESPONSIVE ── */
+    @media(max-width:768px) {
+      .hide-mobile {
+        display: none !important;
+      }
+      .nav-inner {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
+    }
+
     @media(max-width:640px) {
       .nav-inner {
         padding: 12px 16px;
@@ -569,8 +580,8 @@
         {% endif %}
         <a href="/logout/" class="btn-fill" style="background: #ef4444; color: white;">Logout</a>
         {% else %}
-        <a href="/login/" class="btn-ghost">Login / लॉगिन</a>
-        <a href="/signup/" class="btn-fill">Sign Up Free / रजिस्टर करें</a>
+        <a href="/login/" class="btn-ghost">Login<span class="hide-mobile"> / लॉगिन</span></a>
+        <a href="/signup/" class="btn-fill">Sign Up<span class="hide-mobile"> Free / रजिस्टर करें</span></a>
         {% endif %}
       </div>
     </div>

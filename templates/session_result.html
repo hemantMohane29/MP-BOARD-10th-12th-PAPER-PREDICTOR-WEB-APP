@@ -20,7 +20,6 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--ink); 
 .main-nav { background:var(--white); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
 .nav-container { max-width:1400px; margin:0 auto; padding:16px 32px; display:flex; align-items:center; justify-content:space-between; }
 .nav-brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
-.brand-icon { width:32px; height:32px; background:linear-gradient(135deg,var(--blue-deep),var(--blue-mid)); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; color:white; }
 .brand-name { font-size:20px; font-weight:800; color:var(--blue-deep); font-family:var(--font-head); }
 .nav-menu { display:flex; gap:8px; }
 .nav-link { padding:10px 20px; border-radius:8px; color:var(--muted); font-weight:600; text-decoration:none; transition:all 0.2s; font-size:14px; }
@@ -28,7 +27,49 @@ body { font-family: var(--font-body); background: var(--bg); color: var(--ink); 
 .nav-link.active { background:linear-gradient(135deg,var(--blue-deep),var(--blue-mid)); color:white; }
 .nav-actions { display:flex; align-items:center; gap:16px; }
 .username { font-size:14px; font-weight:600; color:var(--ink); }
+
+/* Hamburger */
+.nav-hamburger { display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:6px; border-radius:6px; transition:background 0.2s; }
+.nav-hamburger:hover { background:#f1f5f9; }
+.nav-hamburger span { display:block; width:22px; height:2px; background:var(--ink); border-radius:2px; transition:all 0.3s; }
+.nav-hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity:0; }
+.nav-hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+/* Mobile Nav Drawer */
+.mobile-nav-overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.55); z-index:200; backdrop-filter:blur(4px); }
+.mobile-nav-overlay.show { display:block; }
+.mobile-nav-drawer { position:fixed; top:0; right:0; width:280px; height:100vh; background:var(--white); z-index:201; box-shadow:-8px 0 40px rgba(0,0,0,0.15); display:flex; flex-direction:column; padding:24px 20px; gap:8px; transform:translateX(100%); transition:transform 0.3s cubic-bezier(0.16,1,0.3,1); }
+.mobile-nav-drawer.show { transform:translateX(0); }
+.mobile-nav-drawer .nav-link { font-size:15px; padding:14px 18px; border-radius:10px; }
+.mobile-nav-drawer .drawer-footer { margin-top:auto; display:flex; justify-content:space-between; align-items:center; padding-top:20px; border-top:1px solid var(--border); font-size:14px; }
+.mobile-nav-drawer .drawer-username { font-weight:600; color:var(--ink); }
+.mobile-nav-drawer .drawer-logout { color:#dc2626; font-weight:600; text-decoration:none; }
+
 main { max-width:1100px; margin:32px auto; padding:0 32px 80px; }
+
+/* Responsive */
+@media(max-width:768px) {
+  .nav-menu, .username { display:none; }
+  .nav-hamburger { display:flex; }
+  .nav-container { padding:14px 20px; }
+  .btn-logout {
+    padding: 7px 14px;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  main { padding:0 16px 60px; margin:24px auto; }
+  .session-banner { padding:24px 20px; flex-direction:column; align-items:flex-start; }
+  .session-banner h1 { font-size:20px; }
+  .back-btn { width:100%; justify-content:center; }
+  .tabs-nav { gap:6px; }
+  .tab-btn { padding:8px 14px; font-size:13px; }
+}
+@media(max-width:480px) {
+  .session-banner h1 { font-size:18px; }
+}
 
 /* Session header banner */
 .session-banner { background:linear-gradient(135deg, #0f172a, #1e3a5f); border-radius:20px; padding:32px; margin-bottom:32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
@@ -36,7 +77,8 @@ main { max-width:1100px; margin:32px auto; padding:0 32px 80px; }
 .session-banner p { color:#93c5fd; font-size:14px; }
 .back-btn { background:rgba(255,255,255,0.15); color:white; border:1px solid rgba(255,255,255,0.3); padding:10px 20px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:0.2s; flex-shrink:0; }
 .back-btn:hover { background:rgba(255,255,255,0.25); }
-.btn-logout { font-size:14px; color:#dc2626; font-weight:600; text-decoration:none; }
+.btn-logout { font-size:14px; color:#dc2626; font-weight:700; text-decoration:none; padding:8px 16px; background:#fee2e2; border:1px solid #fecaca; border-radius:8px; transition:0.2s; }
+.btn-logout:hover { background:#fecaca; }
 
 .tabs-nav { display:flex; gap:12px; margin-bottom:24px; border-bottom:2px solid var(--border); padding-bottom:12px; overflow-x:auto; }
 .tab-btn { background:transparent; border:none; padding:10px 20px; font-size:15px; font-weight:700; color:var(--muted); cursor:pointer; border-radius:8px; transition:0.2s; white-space:nowrap; }
@@ -66,8 +108,26 @@ main { max-width:1100px; margin:32px auto; padding:0 32px 80px; }
       <span class="username">👤 {{ request.user.username }}</span>
       <a href="/logout/" class="btn-logout">Logout</a>
     </div>
+    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+
+<!-- Mobile Nav -->
+<div class="mobile-nav-overlay" id="mobile-overlay" onclick="closeMobileNav()"></div>
+<div class="mobile-nav-drawer" id="mobile-drawer">
+  <a href="/dashboard/" class="nav-link">📊 Dashboard</a>
+  <a href="/history/" class="nav-link active">📋 History</a>
+  <a href="/papers/" class="nav-link">📚 Library</a>
+  {% if user.is_superuser %}
+  <a href="/admin/" class="nav-link" style="color: #ea580c;">🔧 Admin</a>
+  {% endif %}
+  <div class="drawer-footer">
+    <span class="drawer-username">👤 {{ request.user.username }}</span>
+    <a href="/logout/" class="drawer-logout">Logout</a>
+  </div>
+</div>
 
 <main>
   <div class="session-banner anim-fade-up">
@@ -264,6 +324,21 @@ render();
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     event.currentTarget.classList.add('active');
+  }
+  function toggleMobileNav() {
+    const btn = document.getElementById('nav-hamburger');
+    const overlay = document.getElementById('mobile-overlay');
+    const drawer = document.getElementById('mobile-drawer');
+    btn.classList.toggle('open');
+    overlay.classList.toggle('show');
+    drawer.classList.toggle('show');
+    document.body.style.overflow = drawer.classList.contains('show') ? 'hidden' : '';
+  }
+  function closeMobileNav() {
+    document.getElementById('nav-hamburger').classList.remove('open');
+    document.getElementById('mobile-overlay').classList.remove('show');
+    document.getElementById('mobile-drawer').classList.remove('show');
+    document.body.style.overflow = '';
   }
 </script>
 
