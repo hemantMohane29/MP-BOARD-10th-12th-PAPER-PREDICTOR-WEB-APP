@@ -106,6 +106,24 @@ td { font-size: 15px; color: var(--ink); font-weight: 500;}
 }
 .topbar-logout-btn:hover { background: #fecaca; }
 
+/* Back button in mobile topbar — always visible */
+.topbar-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  background: #eff6ff;
+  color: var(--blue-deep);
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+  white-space: nowrap;
+  transition: 0.2s;
+}
+.topbar-back-btn:hover { background: #dbeafe; }
+
 /* Hamburger */
 .admin-hamburger { display: flex; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
 .admin-hamburger span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 2px; transition: all 0.3s; }
@@ -137,7 +155,9 @@ td { font-size: 15px; color: var(--ink); font-weight: 500;}
   .form-grid { grid-template-columns: 1fr; gap: 12px; }
   .bulk-actions-toolbar { padding: 14px 16px; border-radius: 16px; }
   .selected-count-badge { font-size: 14px; }
-  .topbar-logout-btn { display: none; }
+  .topbar-logout-btn { font-size: 12px; padding: 6px 10px; }
+  .topbar-back-btn { font-size: 12px; padding: 6px 10px; }
+  .mobile-topbar .brand-name { font-size: 15px; }
 }
 
 
@@ -400,15 +420,14 @@ td { font-size: 15px; color: var(--ink); font-weight: 500;}
 
 <!-- Mobile Header for Admin Panel -->
 <div class="mobile-topbar">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <a href="/dashboard/" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;color:var(--blue-deep);font-size:18px;text-decoration:none;font-weight:700;" title="Back to Dashboard">←</a>
-    <img src="{% static 'images/logo.jpeg' %}" style="width:32px;height:32px;border-radius:8px;object-fit:cover;">
-    <span class="brand-name">MP Board Admin</span>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="/dashboard/" class="topbar-back-btn" title="Back to Dashboard">
+      ← Back
+    </a>
+    <span class="brand-name">Admin</span>
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
-    <a href="/logout/" class="topbar-logout-btn">
-      Logout
-    </a>
+    <a href="/logout/" class="topbar-logout-btn">Logout</a>
     <button class="admin-hamburger" id="admin-hamburger" onclick="toggleAdminNav()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
