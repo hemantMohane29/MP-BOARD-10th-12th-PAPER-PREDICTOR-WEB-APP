@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Dashboard - MP Board Analyzer</title>
+<link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpeg' %}">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/global_animations.css' %}">
 <style>
@@ -18,27 +19,47 @@
   --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
   --font-head: 'Manrope', sans-serif; --font-body: 'Inter', sans-serif;
 }
-body { font-family: var(--font-body); background: var(--bg); color: var(--ink); display: flex; min-height: 100vh;}
+body { font-family: var(--font-body); background: var(--bg); color: var(--ink); min-height: 100vh;}
 
-/* Sidebar */
-.sidebar { width: 280px; background: var(--white); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; height: 100vh; overflow-y: auto;}
-.brand { padding: 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); text-decoration: none;}
-.brand-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white;}
-.brand-name { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--blue-deep); line-height: 1.2;}
-.brand-tag { font-size: 11px; color: var(--muted); font-family: 'Noto Sans Devanagari', sans-serif;}
-.nav-menu { padding: 24px 16px; flex-grow: 1; display: flex; flex-direction: column; gap: 8px;}
-.nav-item { padding: 12px 16px; border-radius: 8px; color: var(--muted); font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 12px; transition: 0.2s;}
-.nav-item:hover { background: var(--bg); color: var(--ink); }
-.nav-item.active { background: var(--blue-light); color: var(--blue-mid); }
-.nav-back-btn { margin-top: 8px; border: 1.5px solid var(--border); color: var(--ink) !important; background: var(--white); }
-.nav-back-btn:hover { background: #f1f5f9 !important; border-color: var(--blue-mid); color: var(--blue-deep) !important; }
-.nav-icon { font-size: 18px; }
-.user-info { padding: 20px 24px; border-top: 1px solid var(--border); background: #f8fafc; display: flex; flex-direction: column; gap: 14px; align-items: stretch; }
-.logout-btn { display: block; text-align: center; padding: 10px 16px; background: #fee2e2; color: var(--red); font-weight: 700; text-decoration: none; border-radius: 8px; border: 1px solid #fecaca; font-size: 13px; transition: 0.2s; white-space: nowrap; }
-.logout-btn:hover { background: #fecaca; }
+/* Navigation */
+.main-nav { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.nav-container { max-width: 1400px; margin: 0 auto; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none;}
+.brand-name { font-size: 20px; font-weight: 800; color: var(--blue-deep); font-family: var(--font-head); }
+.nav-menu { display: flex; gap: 8px; }
+.nav-link { padding: 10px 20px; border-radius: 8px; color: var(--muted); font-weight: 600; text-decoration: none; transition: all 0.2s; font-size: 14px;}
+.nav-link:hover { background: #f1f5f9; color: var(--blue-deep); }
+.nav-link.active { background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); color: white; }
+.nav-actions { display: flex; align-items: center; gap: 16px; }
+.username { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+/* Hamburger */
+.nav-hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; border-radius: 6px; transition: background 0.2s; }
+.nav-hamburger:hover { background: #f1f5f9; }
+.nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 2px; transition: all 0.3s; }
+.nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Mobile Nav Drawer */
+.mobile-nav-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 200; backdrop-filter: blur(4px); }
+.mobile-nav-overlay.show { display: block; }
+.mobile-nav-drawer { position: fixed; top: 0; right: 0; width: 280px; height: 100vh; background: var(--white); z-index: 201; box-shadow: -8px 0 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; padding: 24px 20px; gap: 8px; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); }
+.mobile-nav-drawer.show { transform: translateX(0); }
+.mobile-nav-drawer .nav-link { font-size: 15px; padding: 14px 18px; border-radius: 10px; }
+.mobile-nav-drawer .drawer-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid var(--border); font-size: 14px; }
+.mobile-nav-drawer .drawer-username { font-weight: 600; color: var(--ink); }
+.mobile-nav-drawer .drawer-logout { color: #dc2626; font-weight: 600; text-decoration: none; }
 
 /* Main Content */
-.main-content { margin-left: 280px; padding: 40px; flex-grow: 1; max-width: 1200px; }
+.main-content { max-width: 1400px; margin: 32px auto; padding: 0 32px; flex-grow: 1; }
+
+/* Session header banner */
+.session-banner { background:linear-gradient(135deg, #0f172a, #1e3a5f); border-radius:20px; padding:32px; margin-bottom:32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+.session-banner h1 { color:white; font-size:26px; font-weight:800; font-family:var(--font-head); margin-bottom:6px; }
+.session-banner p { color:#93c5fd; font-size:14px; }
+.back-btn { background:rgba(255,255,255,0.15); color:white; border:1px solid rgba(255,255,255,0.3); padding:10px 20px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:0.2s; flex-shrink:0; }
+.back-btn:hover { background:rgba(255,255,255,0.25); }
 .page-header { margin-bottom: 32px; }
 .page-header h1 { font-family: var(--font-head); font-size: 32px; font-weight: 800; color: var(--ink); margin-bottom: 8px;}
 .page-header p { color: var(--muted); font-size: 15px;}
@@ -72,92 +93,36 @@ td { font-size: 15px; color: var(--ink); font-weight: 500;}
 .btn-delete { background: none; border: none; color: var(--red); font-size: 14px; font-weight: 600; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: 0.2s;}
 .btn-delete:hover { background: #fee2e2; }
 
-@media(max-width: 1024px) {
-  .sidebar { display: none; }
-  .main-content { margin-left: 0; padding: 24px; }
-  .form-grid { grid-template-columns: 1fr; }
-  .mobile-topbar { display: flex; }
-}
-
-/* Mobile top bar */
-.mobile-topbar {
-  display: none;
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  padding: 14px 20px;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-.mobile-topbar .brand-name { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--blue-deep); }
-
-.topbar-logout-btn {
-  padding: 7px 14px;
-  background: #fee2e2;
-  color: var(--red);
-  font-weight: 700;
-  text-decoration: none;
-  border-radius: 8px;
-  border: 1px solid #fecaca;
-  font-size: 13px;
-  transition: 0.2s;
-  white-space: nowrap;
-}
-.topbar-logout-btn:hover { background: #fecaca; }
-
-/* Back button in mobile topbar — always visible */
-.topbar-back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 8px 14px;
-  background: #eff6ff;
-  color: var(--blue-deep);
-  font-weight: 700;
-  font-size: 13px;
-  text-decoration: none;
-  border-radius: 8px;
-  border: 1px solid #bfdbfe;
-  white-space: nowrap;
-  transition: 0.2s;
-}
-.topbar-back-btn:hover { background: #dbeafe; }
-
-/* Hamburger */
-.admin-hamburger { display: flex; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
-.admin-hamburger span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 2px; transition: all 0.3s; }
-.admin-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.admin-hamburger.open span:nth-child(2) { opacity: 0; }
-.admin-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-/* Mobile drawer */
-.admin-nav-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 200; }
-.admin-nav-overlay.show { display: block; }
-.admin-nav-drawer { position: fixed; top: 0; left: 0; width: 280px; height: 100vh; background: var(--white); z-index: 201; box-shadow: 8px 0 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; padding: 24px 20px; gap: 8px; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); }
-.admin-nav-drawer.show { transform: translateX(0); }
-.admin-nav-drawer .nav-item { font-size: 15px; padding: 14px 18px; }
-.admin-nav-drawer .drawer-footer { margin-top: auto; display: flex; flex-direction: column; gap: 14px; align-items: stretch; padding-top: 20px; border-top: 1px solid var(--border); }
-
 /* Table scroll on mobile */
 .table-scroll-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border); }
 
+@media(max-width: 1024px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
 @media(max-width: 768px) {
-  .main-content { padding: 16px; }
-  .form-grid { gap: 12px; }
-  .confirm-modal-box { padding: 24px 20px; }
-  .toolbar-inner { flex-wrap: wrap; gap: 10px; }
-  .btn-toolbar-cancel, .btn-toolbar-delete { flex: 1 1 auto; font-size: 13px; padding: 10px 16px; }
+  .nav-menu, .username { display: none; }
+  .nav-hamburger { display: flex; }
+  .nav-container { padding: 14px 20px; }
+  .main-content { padding: 0 16px; margin: 24px auto; }
+  a[href="/logout/"] {
+    padding: 7px 14px !important;
+    background: #fee2e2 !important;
+    border: 1px solid #fecaca !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    color: #dc2626 !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+  }
+  .session-banner { padding: 24px 20px; flex-direction: column; align-items: flex-start; }
+  .session-banner h1 { font-size: 20px; }
+  .back-btn { width: 100%; justify-content: center; }
 }
 @media(max-width: 480px) {
-  .main-content { padding: 12px; }
   .card { padding: 20px 16px; }
   .form-grid { grid-template-columns: 1fr; gap: 12px; }
   .bulk-actions-toolbar { padding: 14px 16px; border-radius: 16px; }
   .selected-count-badge { font-size: 14px; }
-  .topbar-logout-btn { font-size: 12px; padding: 6px 10px; }
-  .topbar-back-btn { font-size: 12px; padding: 6px 10px; }
-  .mobile-topbar .brand-name { font-size: 15px; }
 }
 
 
@@ -418,92 +383,55 @@ td { font-size: 15px; color: var(--ink); font-weight: 500;}
 </head>
 <body>
 
-<!-- Mobile Header for Admin Panel -->
-<div class="mobile-topbar">
-  <div style="display:flex;align-items:center;gap:8px;">
-    <a href="/dashboard/" class="topbar-back-btn" title="Back to Dashboard">
-      ← Back
+<!-- Navigation Header -->
+<nav class="main-nav">
+  <div class="nav-container">
+    <a href="/" class="nav-brand">
+      <img src="{% static 'images/logo.jpeg' %}" alt="Logo" style="width: 32px; height: 32px; border-radius: 8px; object-fit: cover;">
+      <span class="brand-name">MP Board Analyzer</span>
     </a>
-    <span class="brand-name">Admin</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <a href="/logout/" class="topbar-logout-btn">Logout</a>
-    <button class="admin-hamburger" id="admin-hamburger" onclick="toggleAdminNav()" aria-label="Menu">
+    <div class="nav-menu">
+      <a href="/dashboard/" class="nav-link">Dashboard</a>
+      <a href="/history/" class="nav-link">History</a>
+      <a href="/papers/" class="nav-link">Library</a>
+      {% if user.is_superuser %}
+      <a href="/admin/" class="nav-link active" style="color: #ea580c; border: 1px dashed #ea580c;">Admin</a>
+      {% endif %}
+    </div>
+    <div class="nav-actions">
+      <span class="username">👤 {{ user.username }}</span>
+      <a href="/logout/" style="font-size: 14px; color: #dc2626; font-weight: 600; text-decoration: none;">Logout</a>
+    </div>
+    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileNav()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
   </div>
-</div>
+</nav>
 
-<!-- Admin Mobile Navigation Drawer & Overlay -->
-<div class="admin-nav-overlay" id="admin-overlay" onclick="closeAdminNav()"></div>
-<div class="admin-nav-drawer" id="admin-drawer">
-  <div style="display:flex;align-items:center;gap:12px;padding: 0 0 16px 0;border-bottom:1px solid var(--border);margin-bottom:16px;">
-    <img src="{% static 'images/logo.jpeg' %}" style="width: 36px; height: 36px; border-radius: 8px; object-fit: cover;">
-    <div>
-      <div class="brand-name">MP Board Analyzer</div>
-      <div class="brand-tag" style="font-size:11px;color:var(--muted);font-family:'Noto Sans Devanagari',sans-serif;">Admin Dashboard</div>
-    </div>
-  </div>
-  <a href="/admin/" class="nav-item active">
-    <span class="nav-icon">📤</span> Bulk Upload
-  </a>
-  <a href="/dashboard/" class="nav-item">
-    <span class="nav-icon">📊</span> View App Dashboard
-  </a>
-  <a href="/dashboard/" class="nav-item nav-back-btn">
-    <span class="nav-icon">←</span> Back to Dashboard
-  </a>
+<!-- Mobile Nav -->
+<div class="mobile-nav-overlay" id="mobile-overlay" onclick="closeMobileNav()"></div>
+<div class="mobile-nav-drawer" id="mobile-drawer">
+  <a href="/dashboard/" class="nav-link">📊 Dashboard</a>
+  <a href="/history/" class="nav-link">📋 History</a>
+  <a href="/papers/" class="nav-link">📚 Library</a>
+  {% if user.is_superuser %}
+  <a href="/admin/" class="nav-link active" style="color: #ea580c;">🔧 Admin</a>
+  {% endif %}
   <div class="drawer-footer">
-    <div style="display:flex;align-items:center;gap:8px;">
-      <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue-deep),var(--blue-mid));display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700;flex-shrink:0;">
-        {{ user.username|first|upper }}
-      </div>
-      <div>
-        <div style="font-weight:700;font-size:13px;color:var(--ink);">{{ user.username }}</div>
-        <div style="font-size:10px;color:var(--muted);">Administrator</div>
-      </div>
-    </div>
-    <a href="/logout/" class="logout-btn">Logout</a>
+    <span class="drawer-username">👤 {{ user.username }}</span>
+    <a href="/logout/" class="drawer-logout">Logout</a>
   </div>
 </div>
-
-<aside class="sidebar">
-  <a href="/" class="brand">
-    <img src="{% static 'images/logo.jpeg' %}" alt="Logo" style="width: 36px; height: 36px; border-radius: 8px; object-fit: cover;">
-    <div>
-      <div class="brand-name">MP Board Analyzer</div>
-      <div class="brand-tag">Admin Dashboard</div>
-    </div>
-  </a>
-  <nav class="nav-menu">
-    <a href="/admin/" class="nav-item active">
-      <span class="nav-icon">📤</span> Bulk Upload
-    </a>
-    <a href="/dashboard/" class="nav-item">
-      <span class="nav-icon">📊</span> View App Dashboard
-    </a>
-    <a href="/dashboard/" class="nav-item nav-back-btn">
-      <span class="nav-icon">←</span> Back to Dashboard
-    </a>
-  </nav>
-  <div class="user-info">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue-deep),var(--blue-mid));display:flex;align-items:center;justify-content:center;color:white;font-size:15px;font-weight:700;flex-shrink:0;">
-        {{ user.username|first|upper }}
-      </div>
-      <div>
-        <div style="font-weight:700;font-size:13px;color:var(--ink);">{{ user.username }}</div>
-        <div style="font-size:11px;color:var(--muted);">Administrator</div>
-      </div>
-    </div>
-    <a href="/logout/" class="logout-btn">Logout</a>
-  </div>
-</aside>
 
 <main class="main-content">
-  <div class="page-header anim-fade-up">
-    <h1>Manage Library Papers</h1>
-    <p>Upload new PDF or Image question papers and manage your existing database.</p>
+  <div class="session-banner anim-fade-up">
+    <div>
+      <h1>Manage Library Papers / प्रबंधन</h1>
+      <p>Upload new PDF or Image question papers and manage your existing database. / डेटाबेस प्रबंधन</p>
+    </div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+      <a href="/dashboard/" class="back-btn">← Back to Dashboard / मुख्य पृष्ठ</a>
+    </div>
   </div>
 
   {% if success %}
@@ -875,24 +803,20 @@ td { font-size: 15px; color: var(--ink); font-weight: 500;}
   }
 
   // Toggle mobile navigation drawer
-  function toggleAdminNav() {
-    const drawer = document.getElementById('admin-drawer');
-    const overlay = document.getElementById('admin-overlay');
-    const hamburger = document.getElementById('admin-hamburger');
-    
-    drawer.classList.toggle('show');
+  function toggleMobileNav() {
+    const btn = document.getElementById('nav-hamburger');
+    const overlay = document.getElementById('mobile-overlay');
+    const drawer = document.getElementById('mobile-drawer');
+    btn.classList.toggle('open');
     overlay.classList.toggle('show');
-    hamburger.classList.toggle('open');
+    drawer.classList.toggle('show');
+    document.body.style.overflow = drawer.classList.contains('show') ? 'hidden' : '';
   }
-
-  function closeAdminNav() {
-    const drawer = document.getElementById('admin-drawer');
-    const overlay = document.getElementById('admin-overlay');
-    const hamburger = document.getElementById('admin-hamburger');
-    
-    drawer.classList.remove('show');
-    overlay.classList.remove('show');
-    hamburger.classList.remove('open');
+  function closeMobileNav() {
+    document.getElementById('nav-hamburger').classList.remove('open');
+    document.getElementById('mobile-overlay').classList.remove('show');
+    document.getElementById('mobile-drawer').classList.remove('show');
+    document.body.style.overflow = '';
   }
   </script>
 
